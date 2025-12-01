@@ -1,0 +1,14 @@
+[
+    {
+        "id": "10fb8191-fc68-4e61-b85d-327fe4f6acf1",
+        "name": "Alice",
+        "document": "14521488956",
+        "birth_date": "1990-05-15"
+    },
+    {
+        "id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
+        "name": "Gabryelle",
+        "document": "85632598741",
+        "birth_date": "2000-04-16"
+    }
+]

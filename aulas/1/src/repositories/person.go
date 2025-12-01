@@ -1,0 +1,64 @@
+package repositories
+
+import (
+	"encoding/json"
+	"fmt"
+	"spanishGab/aula_camada_model/src/db"
+	"spanishGab/aula_camada_model/src/models"
+	"time"
+
+	_ "embed"
+
+	"github.com/google/uuid"
+)
+
+const dateLayout = "2006-01-02"
+
+type PersonDBRegistry struct {
+	Id        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Document  string    `json:"document"`
+	BirthDate string    `json:"birth_date"`
+}
+
+func (p *PersonDBRegistry) ToModel() *models.Person {
+	birthDate, _ := time.Parse(dateLayout, p.BirthDate)
+	return &models.Person{
+		Id:        p.Id,
+		Name:      p.Name,
+		Document:  p.Document,
+		BirthDate: birthDate,
+	}
+}
+
+type PersonRepository struct {
+	dbConnection db.FileHandler
+}
+
+func NewPersonRepository(dbConnection db.FileHandler) *PersonRepository {
+	return &PersonRepository{
+		dbConnection: dbConnection,
+	}
+}
+
+func (p *PersonRepository) GetById(id uuid.UUID) (*models.Person, error) {
+	var persons []PersonDBRegistry
+
+	personsDBTable, err := p.dbConnection.Read()
+	if err != nil {
+		fmt.Printf("Error on PersonRepository.getById: %s\n", err)
+		return nil, err
+	}
+	err = json.Unmarshal(personsDBTable, &persons)
+
+	if err != nil {
+		fmt.Printf("Error on PersonRepository.getById: %s\n", err)
+		return nil, err
+	}
+	for _, person := range persons {
+		if person.Id == id {
+			return person.ToModel(), nil
+		}
+	}
+	return nil, fmt.Errorf("person with id '%s' not found", id)
+}
