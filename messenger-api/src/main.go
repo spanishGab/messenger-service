@@ -13,8 +13,13 @@ import (
 func main() {
 	fmt.Println("Start main.go")
 
-	cwd := os.Getenv("CWD")
-	dbConnection := db.NewFileHandler(path.Join(cwd, "src", "db", "message.json"))
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("não foi possivel obter caminho do path")
+		return
+	}
+
+	dbConnection := db.NewFileHandler(path.Join(cwd, "db", "message.json"))
 	dbConnection.Connection()
 
 	repo := repositories.NewMessageRepository(*dbConnection)

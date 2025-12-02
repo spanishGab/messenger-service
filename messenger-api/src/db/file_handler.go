@@ -20,11 +20,9 @@ func NewFileHandler(filename string) *FileHandler {
 }
 
 func (fh *FileHandler) Connection() {
-	fmt.Printf("Arquivo %s\n", fh.FileName)
-
 	_, err := os.OpenFile(fh.FileName, os.O_RDWR|os.O_CREATE, OwnerRWPermission)
 	if err != nil {
-		fmt.Printf("erro ao abrir arquivo %v\n", err)
+		panic(fmt.Sprintf("failed to open file '%s': %s", fh.FileName, err))
 	} 
 	// defer file.Close()
 }
