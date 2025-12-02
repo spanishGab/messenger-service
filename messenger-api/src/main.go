@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/repositories"
@@ -11,11 +12,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Start main.go")
-
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("não foi possivel obter caminho do path")
+		fmt.Printf("failed to get current working directory: %v", err)
 		return
 	}
 
@@ -27,10 +26,11 @@ func main() {
 	var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
 
 	message, err := repo.GetById(id)
-	if message == nil {
-		fmt.Println("não foi possivel encontrar message id: %s. Error: ", id, err)
+	if err != nil {
+		fmt.Println("failed to retrieve message with ID '%w': %w", id, err)
 		return 
 	}
 
-	fmt.Println(message)
+	output, _ := json.MarshalIndent(message, "", "  ")
+	fmt.Printf("Message found:\n%+v\n", string(output))
 }
