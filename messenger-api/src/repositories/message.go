@@ -5,12 +5,29 @@ import (
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-// todo: db/message.json validar se ele suportar inteiro ou so string
+const dateFormat = "2006-01-02"
 
+type MessageDBRegistry struct {
+	Id uuid.UUID `json:"id"`
+	Content string `json:"content"`
+	CreatedAt string `json:"created_at"`
+	TimesSent int32 `json:"times_sent"`
+}
+
+func (m *MessageDBRegistry) ToModel() *entities.Message{
+	createdAt, _ := time.Parse(dateFormat, m.CreatedAt)
+	return &entities.Message{
+		Id: m.Id,
+		Content: m.Content,
+		CreatedAt: createdAt,
+		TimesSent: m.TimesSent,
+	}
+}
 
 type MessageRespository struct {
 	dbConnection db.FileHandler
@@ -23,7 +40,7 @@ func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
 }
 
 func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
-	var messages []entities.Message
+	var messages []MessageDBRegistry
 
 	file, err := m.dbConnection.Read()
 	if err != nil {
@@ -37,7 +54,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 
 	for _, message := range messages {
 		if message.Id == id {
-			return &message, nil
+			return message.ToModel(), nil
 		}
 	}
 	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
