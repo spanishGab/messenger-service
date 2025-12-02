@@ -27,12 +27,12 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 
 	file, err := m.dbConnection.Read()
 	if err != nil {
-		return nil, fmt.Errorf("não foi possivel ler o arquivo para obter os dados")
+		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
 	}
 
 	err = json.Unmarshal(file, &messages)
 	if err != nil {
-		return nil, fmt.Errorf("não foi possivel decodificar o json")
+		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
 	}
 
 	for _, message := range messages {
@@ -40,5 +40,5 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 			return &message, nil
 		}
 	}
-	return nil, fmt.Errorf("não foi possivel encontrar o id %s", id) 
+	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
 }
