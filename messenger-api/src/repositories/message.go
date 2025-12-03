@@ -61,7 +61,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
 }
 
-func (m *MessageRespository) GetMessage(filters entities.Filters) (*[]entities.Message, error) {
+func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
 	var messages []MessageDBRegistry
 	var results []entities.Message
 
