@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"messenger-api/src/db"
+	"messenger-api/src/entities"
 	"messenger-api/src/repositories"
 	"os"
 	"path"
@@ -23,14 +24,47 @@ func main() {
 
 	repo := repositories.NewMessageRepository(*dbConnection)
 
-	var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
+	// GetById
+	// var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
+	// message, err := repo.GetById(id)
+	// if err != nil {
+	// 	fmt.Println("failed to retrieve message with ID '%w': %w", id, err)
+	// 	return 
+	// }
 
-	message, err := repo.GetById(id)
+	// output, _ := json.MarshalIndent(message, "", "  ")
+	// fmt.Printf("Message found:\n%+v\n", string(output))
+
+	// GetMessages
+	// count := int32(5)
+	// filters := entities.Filters{
+	// 	Content: "new",
+	// 	CreatedAt: "2000-04-16",
+	// 	TimesSent: &count,
+	// }
+
+	// message, err := repo.GetMessages(filters)
+	// if err != nil {
+	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
+	// 	return 
+	// }
+	// output, _ := json.MarshalIndent(message, "", "  ")
+	// fmt.Printf("Message found:\n%+v\n", string(output))
+
+	// DeleteMessages
+	var id = uuid.MustParse("bd7fe779-e7b5-4eee-bd22-ef8b15418a4c")
+	err = repo.DeleteMessage(id)
 	if err != nil {
-		fmt.Println("failed to retrieve message with ID '%w': %w", id, err)
-		return 
+		fmt.Println(err)
+		return
 	}
 
+	filters := entities.Filters{}
+	message, err := repo.GetMessages(filters)
+	if err != nil {
+		fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
+		return 
+	}
 	output, _ := json.MarshalIndent(message, "", "  ")
-	fmt.Printf("Message found:\n%+v\n", string(output))
+	fmt.Printf("Messages found:\n%+v\n", string(output))
 }
