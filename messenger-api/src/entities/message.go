@@ -12,3 +12,9 @@ type Message struct {
 	CreatedAt time.Time `json:"created_at"`
 	TimesSent int32 `json:"times_sent"`
 }
+
+type Filters struct {
+	Content string
+	CreatedAt string 
+	TimesSent *int32 
+}

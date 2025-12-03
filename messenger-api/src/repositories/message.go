@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,4 +59,46 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 		}
 	}
 	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
+}
+
+func (m *MessageRespository) GetMessage(filters entities.Filters) (*[]entities.Message, error) {
+	var messages []MessageDBRegistry
+	var results []entities.Message
+
+	file, err := m.dbConnection.Read()
+	if err != nil {
+		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+	}
+
+	err = json.Unmarshal(file, &messages)
+		if err != nil {
+		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
+	}
+
+	filterContent := strings.ToLower(strings.TrimSpace(filters.Content))
+	filterCreatedAt := strings.TrimSpace(filters.CreatedAt)
+
+	for _, message := range messages {
+		if filterContent != "" {
+			if !strings.Contains(strings.ToLower(message.Content), filterContent) {
+				continue
+			}
+		}
+
+		if filterCreatedAt != "" {
+			if message.CreatedAt != filters.CreatedAt {
+				continue
+			} 
+		}
+
+		if filters.TimesSent != nil {
+			if message.TimesSent != *filters.TimesSent {
+				continue
+			}
+		}
+
+		results = append(results, *message.ToModel())
+	}
+
+	return &results, nil
 }
