@@ -102,3 +102,40 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 	return &results, nil
 }
+
+func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
+	var messages []MessageDBRegistry
+
+	file, err := m.dbConnection.Read()
+	if err != nil {
+		return fmt.Errorf("unable to read database file for message lookup: %w", err)
+	}
+
+	err = json.Unmarshal(file, &messages)
+	initialCountItemJSON := len(messages)
+	if err != nil {
+		return fmt.Errorf("invalid JSON format in database file: %w", err)
+	}
+
+	for index, message := range messages {
+		if message.Id == id {
+			messages = append(messages[:index], messages[index + 1:]...)
+		}
+	}
+
+	if (initialCountItemJSON) == len(messages) {
+		return fmt.Errorf("ID not found %s", id)
+	}
+
+	newData, err := json.MarshalIndent(messages, "", " ")
+	if err != nil {
+		return fmt.Errorf("failed to encode updated data: %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("failed to save database: %w", err)
+	}
+
+	return nil
+}
