@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
 	"messenger-api/src/repositories"
 	"os"
 	"path"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -52,19 +52,35 @@ func main() {
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
 	// DeleteMessages
-	var id = uuid.MustParse("bd7fe779-e7b5-4eee-bd22-ef8b15418a4c")
-	err = repo.DeleteMessage(id)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// var id = uuid.MustParse("bd7fe779-e7b5-4eee-bd22-ef8b15418a4c")
+	// err = repo.DeleteMessage(id)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	filters := entities.Filters{}
-	message, err := repo.GetMessages(filters)
+	// filters := entities.Filters{}
+	// message, err := repo.GetMessages(filters)
+	// if err != nil {
+	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
+	// 	return 
+	// }
+	// output, _ := json.MarshalIndent(message, "", "  ")
+	// fmt.Printf("Messages found:\n%+v\n", string(output))
+
+	// InsertMessage
+	var id = uuid.New()
+	createdAt := time.Now()
+
+	message := entities.Message{
+		Id: id,
+		Content: "Message about money",
+		CreatedAt: createdAt,
+		TimesSent: 21,
+	}
+	err = repo.InsertMessage(message)
 	if err != nil {
-		fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
+		fmt.Println("failed to insert message '%w': %w", message)
 		return 
 	}
-	output, _ := json.MarshalIndent(message, "", "  ")
-	fmt.Printf("Messages found:\n%+v\n", string(output))
 }
