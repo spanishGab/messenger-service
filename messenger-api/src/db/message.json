@@ -1,26 +1,50 @@
 [
   {
-    "id": "bc49510d-4ec3-4560-83ae-912064d5cd19",
-    "content": "new menssage 01",
-    "created_at": "1990-05-15",
-    "times_sent": 2
+   "id": "bc49510d-4ec3-4560-83ae-912064d5cd19",
+   "content": "new menssage 01",
+   "created_at": "1990-05-15",
+   "times_sent": 2
   },
   {
-    "id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
-    "content": "new menssage 02",
-    "created_at": "2000-04-16",
-    "times_sent": 5
+   "id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
+   "content": "new menssage 02",
+   "created_at": "2000-04-16",
+   "times_sent": 5
   },
   {
-    "id": "45f88db2-d973-44cf-abd4-4bda898d8ef6",
-    "content": "new menssage 03",
-    "created_at": "2000-04-16",
-    "times_sent": 4
+   "id": "45f88db2-d973-44cf-abd4-4bda898d8ef6",
+   "content": "new menssage 03",
+   "created_at": "2000-04-16",
+   "times_sent": 4
   },
   {
-    "id": "3fd0baf7-8e94-4764-a674-997abdc50c67",
-    "content": "empty 01",
-    "created_at": "2000-04-17",
-    "times_sent": 1
+   "id": "3fd0baf7-8e94-4764-a674-997abdc50c67",
+   "content": "empty 01",
+   "created_at": "2000-04-17",
+   "times_sent": 1
+  },
+  {
+   "id": "8849e12f-f6a6-4f8e-ad58-d50f2b0a443e",
+   "content": "Message about money",
+   "created_at": "2025-12-11",
+   "times_sent": 2
+  },
+  {
+   "id": "04021817-a0d0-4f77-b248-c9410aa76846",
+   "content": "",
+   "created_at": "2025-12-11",
+   "times_sent": 2
+  },
+  {
+   "id": "b829bb89-01e3-4466-8138-452d8fbeaedf",
+   "content": "Message about money",
+   "created_at": "2025-12-11",
+   "times_sent": 2
+  },
+  {
+   "id": "0a5834b0-16b5-4a6a-b995-0292caace221",
+   "content": "Message about money",
+   "created_at": "2025-12-11",
+   "times_sent": 21
   }
-]
+ ]

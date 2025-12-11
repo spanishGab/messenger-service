@@ -139,3 +139,38 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 
 	return nil
 }
+
+func (m *MessageRespository) InsertMessage(message entities.Message) error {
+	var messages []MessageDBRegistry
+
+	file, err := m.dbConnection.Read()
+	if err != nil {
+		return fmt.Errorf("unable to read database file for message lookup: %w", err)
+	}
+
+	err = json.Unmarshal(file, &messages)
+	if err != nil {
+		return fmt.Errorf("error decoding JSON %w", err)
+	}
+
+	newMessage := MessageDBRegistry{
+		Id: message.Id,
+		Content: message.Content,
+		CreatedAt: message.CreatedAt.Format(dateFormat),
+		TimesSent: message.TimesSent,
+	}
+
+	messages = append(messages, newMessage)
+
+	newData, err := json.MarshalIndent(messages, " ", " ")
+	if err != nil {
+		return fmt.Errorf("failed to encode new data: %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("failed to save database: %w", err)
+	}
+
+	return nil
+}
