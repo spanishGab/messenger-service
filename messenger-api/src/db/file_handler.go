@@ -24,7 +24,6 @@ func (fh *FileHandler) Connection() {
 	if err != nil {
 		panic(fmt.Sprintf("failed to open file '%s': %s", fh.FileName, err))
 	} 
-	// defer file.Close()
 }
 
 func (fh *FileHandler) Read() ([]byte, error) {
