@@ -24,7 +24,7 @@ func main() {
 
 	repo := repositories.NewMessageRepository(*dbConnection)
 
-	// GetById
+	// // GetById
 	// var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
 	// message, err := repo.GetById(id)
 	// if err != nil {
@@ -35,8 +35,8 @@ func main() {
 	// output, _ := json.MarshalIndent(message, "", "  ")
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
-	// GetMessages
-	// count := int32(5)
+	// // GetMessages
+	// count := int8(5)
 	// filters := entities.Filters{
 	// 	Content: "new",
 	// 	CreatedAt: "2000-04-16",
@@ -51,8 +51,8 @@ func main() {
 	// output, _ := json.MarshalIndent(message, "", "  ")
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
-	// DeleteMessages
-	// var id = uuid.MustParse("bd7fe779-e7b5-4eee-bd22-ef8b15418a4c")
+	// // DeleteMessages
+	// var id = uuid.MustParse("0a5834b0-16b5-4a6a-b995-0292caace221")
 	// err = repo.DeleteMessage(id)
 	// if err != nil {
 	// 	fmt.Println(err)
@@ -74,9 +74,9 @@ func main() {
 
 	message := entities.Message{
 		Id: id,
-		Content: "Message about money",
+		Content: "Buy boardgame",
 		CreatedAt: createdAt,
-		TimesSent: 21,
+		TimesSent: 2,
 	}
 	err = repo.InsertMessage(message)
 	if err != nil {
