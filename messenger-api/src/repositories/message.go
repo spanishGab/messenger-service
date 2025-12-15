@@ -76,7 +76,9 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 	}
 
 	filterContent := strings.ToLower(strings.TrimSpace(filters.Content))
-	filterCreatedAt := strings.TrimSpace(filters.CreatedAt)
+	filterDateRange := filters.DateRange
+
+	fmt.Println(filterDateRange)
 
 	for _, message := range messages {
 		if filterContent != "" {
@@ -85,8 +87,10 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 			}
 		}
 
-		if filterCreatedAt != "" {
-			if message.CreatedAt != filters.CreatedAt {
+		if filterDateRange != nil {
+			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
+			if messageCreatedAt.Before(filterDateRange.Start) || 
+				messageCreatedAt.After(filterDateRange.End) {
 				continue
 			} 
 		}
