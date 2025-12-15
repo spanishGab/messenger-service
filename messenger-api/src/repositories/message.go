@@ -97,7 +97,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 	var filterContent string
 	if filters.Content != nil {
-		filterContent = strings.ToLower(strings.TrimSpace(*filters.Content)) 
+		filterContent = *filters.Content
 	}
 
 	filterDateRange := filters.DateRange
