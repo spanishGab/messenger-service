@@ -6,6 +6,7 @@ import (
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
 	"messenger-api/src/shared"
+	"slices"
 	"strings"
 	"time"
 
@@ -140,7 +141,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 
 	for index, message := range messages {
 		if message.Id == id {
-			messages = append(messages[:index], messages[index + 1:]...)
+			messages = slices.Delete(messages, index, index + 1)
 		}
 	}
 
