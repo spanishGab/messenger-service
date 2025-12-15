@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type MessageDBRegistry struct {
 	Id uuid.UUID `json:"id"`
 	Content string `json:"content"`
@@ -40,17 +39,26 @@ func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
 	}
 }
 
-func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
-	var messages []MessageDBRegistry
-
+func (m *MessageRespository) readDBConnection(messages *[]MessageDBRegistry) error {
 	file, err := m.dbConnection.Read()
 	if err != nil {
-		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+		return fmt.Errorf("unable to read database file for message lookup: %w", err)
 	}
 
 	err = json.Unmarshal(file, &messages)
 	if err != nil {
-		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
+		return fmt.Errorf("invalid JSON format in database file: %w", err)
+	}
+
+	return nil
+}
+
+func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
+	var messages []MessageDBRegistry
+
+  err := m.readDBConnection(&messages)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, message := range messages {
@@ -82,17 +90,16 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 	var messages []MessageDBRegistry
 	var results []entities.Message
 
-	file, err := m.dbConnection.Read()
+	err := m.readDBConnection(&messages)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+		return nil, err
 	}
 
-	err = json.Unmarshal(file, &messages)
-		if err != nil {
-		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
+	var filterContent string
+	if filters.Content != nil {
+		filterContent = strings.ToLower(strings.TrimSpace(*filters.Content)) 
 	}
 
-	filterContent := strings.ToLower(strings.TrimSpace(*filters.Content))
 	filterDateRange := filters.DateRange
 	for _, message := range messages {
 		if filterContent != "" {
@@ -124,16 +131,12 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 	var messages []MessageDBRegistry
 
-	file, err := m.dbConnection.Read()
+	err := m.readDBConnection(&messages)
 	if err != nil {
-		return fmt.Errorf("unable to read database file for message lookup: %w", err)
+		return err
 	}
 
-	err = json.Unmarshal(file, &messages)
 	initialCountItemJSON := len(messages)
-	if err != nil {
-		return fmt.Errorf("invalid JSON format in database file: %w", err)
-	}
 
 	for index, message := range messages {
 		if message.Id == id {
@@ -161,14 +164,9 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 func (m *MessageRespository) InsertMessage(message entities.Message) error {
 	var messages []MessageDBRegistry
 
-	file, err := m.dbConnection.Read()
+	err := m.readDBConnection(&messages)
 	if err != nil {
-		return fmt.Errorf("unable to read database file for message lookup: %w", err)
-	}
-
-	err = json.Unmarshal(file, &messages)
-	if err != nil {
-		return fmt.Errorf("error decoding JSON %w", err)
+		return err
 	}
 
 	newMessage := MessageDBRegistry{
