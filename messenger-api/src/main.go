@@ -36,7 +36,7 @@ func main() {
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
 	// // GetMessages
-	content := "messages"
+	content := "message"
 
 	startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
 	endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
