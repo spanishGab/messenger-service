@@ -13,8 +13,13 @@ type Message struct {
 	TimesSent int8 `json:"times_sent"`
 }
 
+type DateRange struct {
+	Start time.Time 
+	End time.Time
+}
+
 type Filters struct {
 	Content string
-	CreatedAt string 
+	DateRange *DateRange 
 	TimesSent *int8 
 }
