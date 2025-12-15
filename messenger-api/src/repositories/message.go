@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
+	"messenger-api/src/shared"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-const dateFormat = "2006-01-02"
 
 type MessageDBRegistry struct {
 	Id uuid.UUID `json:"id"`
@@ -21,7 +21,7 @@ type MessageDBRegistry struct {
 }
 
 func (m *MessageDBRegistry) ToModel() *entities.Message{
-	createdAt, _ := time.Parse(dateFormat, m.CreatedAt)
+	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
 	return &entities.Message{
 		Id: m.Id,
 		Content: m.Content,
@@ -156,7 +156,7 @@ func (m *MessageRespository) InsertMessage(message entities.Message) error {
 	newMessage := MessageDBRegistry{
 		Id: message.Id,
 		Content: message.Content,
-		CreatedAt: message.CreatedAt.Format(dateFormat),
+		CreatedAt: message.CreatedAt.Format(shared.ShortDateFormat),
 		TimesSent: message.TimesSent,
 	}
 

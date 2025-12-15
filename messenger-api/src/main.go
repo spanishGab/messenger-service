@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"messenger-api/src/db"
 	"messenger-api/src/entities"
 	"messenger-api/src/repositories"
+	"messenger-api/src/shared"
 	"os"
 	"path"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -37,19 +37,26 @@ func main() {
 
 	// // GetMessages
 	// count := int8(5)
-	// filters := entities.Filters{
-	// 	Content: "new",
-	// 	CreatedAt: "2000-04-16",
-	// 	TimesSent: &count,
-	// }
+	startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
+	endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
 
-	// message, err := repo.GetMessages(filters)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
-	// 	return 
-	// }
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Message found:\n%+v\n", string(output))
+	dateRange := entities.DateRange{
+		Start: startDate,
+		End: endDate,
+	}
+
+	filters := entities.Filters{
+		Content: "Message",
+		DateRange: &dateRange,
+	}
+
+	message, err := repo.GetMessages(filters)
+	if err != nil {
+		fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
+		return 
+	}
+	output, _ := json.MarshalIndent(message, "", "  ")
+	fmt.Printf("Message found:\n%+v\n", string(output))
 
 	// // DeleteMessages
 	// var id = uuid.MustParse("0a5834b0-16b5-4a6a-b995-0292caace221")
@@ -68,19 +75,19 @@ func main() {
 	// output, _ := json.MarshalIndent(message, "", "  ")
 	// fmt.Printf("Messages found:\n%+v\n", string(output))
 
-	// InsertMessage
-	var id = uuid.New()
-	createdAt := time.Now()
+	// // InsertMessage
+	// var id = uuid.New()
+	// createdAt := time.Now()
 
-	message := entities.Message{
-		Id: id,
-		Content: "Buy boardgame",
-		CreatedAt: createdAt,
-		TimesSent: 2,
-	}
-	err = repo.InsertMessage(message)
-	if err != nil {
-		fmt.Println("failed to insert message '%w': %w", message)
-		return 
-	}
+	// message := entities.Message{
+	// 	Id: id,
+	// 	Content: "Buy boardgame",
+	// 	CreatedAt: createdAt,
+	// 	TimesSent: 2,
+	// }
+	// err = repo.InsertMessage(message)
+	// if err != nil {
+	// 	fmt.Println("failed to insert message '%w': %w", message)
+	// 	return 
+	// }
 }
