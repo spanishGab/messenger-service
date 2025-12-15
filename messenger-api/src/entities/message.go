@@ -18,8 +18,13 @@ type DateRange struct {
 	End time.Time
 }
 
+type TimesSent struct {
+	Value int8
+	Operator string
+}
+
 type Filters struct {
 	Content string
 	DateRange *DateRange 
-	TimesSent *int8 
+	TimesSent *TimesSent
 }

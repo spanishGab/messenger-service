@@ -36,7 +36,6 @@ func main() {
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
 	// // GetMessages
-	// count := int8(5)
 	startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
 	endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
 
@@ -45,9 +44,15 @@ func main() {
 		End: endDate,
 	}
 
+	timesSent := entities.TimesSent{
+		Value: int8(2),
+		Operator: "=",
+	}
+
 	filters := entities.Filters{
 		Content: "Message",
 		DateRange: &dateRange,
+		TimesSent: &timesSent,
 	}
 
 	message, err := repo.GetMessages(filters)

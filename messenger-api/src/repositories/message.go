@@ -61,6 +61,23 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message ,error) {
 	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
 }
 
+func matchTimesSend (value int8, filter entities.Filters) bool {
+	switch filter.TimesSent.Operator {
+	case "=":
+		return value == filter.TimesSent.Value
+	case "<":
+		return value < filter.TimesSent.Value
+	case "<=":
+		return value <= filter.TimesSent.Value
+	case ">":
+		return value > filter.TimesSent.Value
+	case ">=":
+		return value >= filter.TimesSent.Value
+	default: 
+		return true
+	}
+}
+
 func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
 	var messages []MessageDBRegistry
 	var results []entities.Message
@@ -77,9 +94,6 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 	filterContent := strings.ToLower(strings.TrimSpace(filters.Content))
 	filterDateRange := filters.DateRange
-
-	fmt.Println(filterDateRange)
-
 	for _, message := range messages {
 		if filterContent != "" {
 			if !strings.Contains(strings.ToLower(message.Content), filterContent) {
@@ -91,12 +105,12 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
 			if messageCreatedAt.Before(filterDateRange.Start) || 
 				messageCreatedAt.After(filterDateRange.End) {
-				continue
-			} 
+					continue
+				}
 		}
 
 		if filters.TimesSent != nil {
-			if message.TimesSent != *filters.TimesSent {
+			if !matchTimesSend(message.TimesSent, filters) {
 				continue
 			}
 		}
