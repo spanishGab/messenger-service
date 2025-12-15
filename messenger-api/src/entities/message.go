@@ -23,8 +23,9 @@ type TimesSent struct {
 	Operator string
 }
 
+// todo: mudar Content para opcional
 type Filters struct {
-	Content string
+	Content *string
 	DateRange *DateRange 
 	TimesSent *TimesSent
 }

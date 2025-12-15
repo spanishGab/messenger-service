@@ -92,7 +92,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
 	}
 
-	filterContent := strings.ToLower(strings.TrimSpace(filters.Content))
+	filterContent := strings.ToLower(strings.TrimSpace(*filters.Content))
 	filterDateRange := filters.DateRange
 	for _, message := range messages {
 		if filterContent != "" {

@@ -36,6 +36,8 @@ func main() {
 	// fmt.Printf("Message found:\n%+v\n", string(output))
 
 	// // GetMessages
+	content := "messages"
+
 	startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
 	endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
 
@@ -50,7 +52,7 @@ func main() {
 	}
 
 	filters := entities.Filters{
-		Content: "Message",
+		Content: &content,
 		DateRange: &dateRange,
 		TimesSent: &timesSent,
 	}
