@@ -40,8 +40,6 @@ func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
 	}
 }
 
-// todo: criar um metodo para buscar o item e ve se ele exist ou nao
-
 func matchTimesSend(value int8, filter entities.Filters) bool {
 	switch filter.TimesSent.Operator {
 	case "=":
@@ -64,37 +62,21 @@ func (m *MessageRespository) readDBConnection() ([]MessageDBRegistry, error) {
 	file, err := m.dbConnection.Read()
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+		return nil, fmt.Errorf("readDBConnection: unable to read database file for message lookup: %w", err)
 	}
 
 	err = json.Unmarshal(file, &messages)
 	if err != nil {
-		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
+		return nil, fmt.Errorf("readDBConnection: invalid JSON format in database file: %w", err)
 	}
 
 	return messages, nil
 }
 
-func getById(id uuid.UUID) (MessageRespository, error) {
-	messages, err := m.readDBConnection()
-	if err != nil {
-		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
-	}
-
-	for _, message := range messages {
-		if message.Id == id {
-			return message.ToModel(), nil
-		}
-	}
-
-	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
-}
-
-
 func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
   messages, err := m.readDBConnection()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getById: %w", err)
 	}
 
 	for _, message := range messages {
@@ -102,7 +84,8 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 			return message.ToModel(), nil
 		}
 	}
-	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
+
+	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
 }
 
 func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
@@ -110,7 +93,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 	messages, err := m.readDBConnection()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getMessages: %w", err)
 	}
 
 	var filterContent string
@@ -149,20 +132,10 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 	messages, err := m.readDBConnection()
 	if err != nil {
-		return err
+		return fmt.Errorf("deleteMessage: %w", err)
 	}
 
-	filters := entities.Filters{
-		Content: nil,
-		DateRange: nil,
-		TimesSent: nil,
-	}
-
-	currentMessagesCount, _ := m.GetMessages(filters)
-	// currentMessagesCount := len(messages)
-
-	fmt.Println("curr %w", len(*currentMessagesCount))
-	fmt.Println("total %w", len(*&messages))
+	currentMessagesCount := len(messages)
 
 	for index, message := range messages {
 		if message.Id == id {
@@ -170,20 +143,18 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 		}
 	}
 
-	fmt.Println("total depois %w", len(*&messages))
-
-	if (currentMessagesCount) == len(*&messages) {
-		return fmt.Errorf("ID not found %s", id)
+	if (currentMessagesCount) == len(messages) {
+		return fmt.Errorf("deleteMessage: ID not found %s", id)
 	}
 
 	newData, err := json.MarshalIndent(messages, "", " ")
 	if err != nil {
-		return fmt.Errorf("failed to encode updated data: %w", err)
+		return fmt.Errorf("deleteMessage: failed to encode updated data: %w", err)
 	}
 
 	_, err = m.dbConnection.Write(newData)
 	if err != nil {
-		return fmt.Errorf("failed to save database: %w", err)
+		return fmt.Errorf("deleteMessage: failed to save database: %w", err)
 	}
 
 	return nil
@@ -192,7 +163,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 func (m *MessageRespository) InsertMessage(message entities.Message) error {
 	messages, err := m.readDBConnection()
 	if err != nil {
-		return err
+		return fmt.Errorf("insertMessage: %w", err)
 	}
 
 	newMessage := MessageDBRegistry{
@@ -206,12 +177,12 @@ func (m *MessageRespository) InsertMessage(message entities.Message) error {
 
 	newData, err := json.MarshalIndent(messages, " ", " ")
 	if err != nil {
-		return fmt.Errorf("failed to encode new data: %w", err)
+		return fmt.Errorf("insertMessage: failed to encode new data: %w", err)
 	}
 
 	_, err = m.dbConnection.Write(newData)
 	if err != nil {
-		return fmt.Errorf("failed to save database: %w", err)
+		return fmt.Errorf("insertMessage: failed to save database: %w", err)
 	}
 
 	return nil
