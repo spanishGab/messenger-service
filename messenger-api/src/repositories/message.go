@@ -40,37 +40,9 @@ func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
 	}
 }
 
-func (m *MessageRespository) readDBConnection(messages *[]MessageDBRegistry) error {
-	file, err := m.dbConnection.Read()
-	if err != nil {
-		return fmt.Errorf("unable to read database file for message lookup: %w", err)
-	}
+// todo: criar um metodo para buscar o item e ve se ele exist ou nao
 
-	err = json.Unmarshal(file, &messages)
-	if err != nil {
-		return fmt.Errorf("invalid JSON format in database file: %w", err)
-	}
-
-	return nil
-}
-
-func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
-	var messages []MessageDBRegistry
-
-  err := m.readDBConnection(&messages)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, message := range messages {
-		if message.Id == id {
-			return message.ToModel(), nil
-		}
-	}
-	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
-}
-
-func matchTimesSend (value int8, filter entities.Filters) bool {
+func matchTimesSend(value int8, filter entities.Filters) bool {
 	switch filter.TimesSent.Operator {
 	case "=":
 		return value == filter.TimesSent.Value
@@ -87,11 +59,56 @@ func matchTimesSend (value int8, filter entities.Filters) bool {
 	}
 }
 
-func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
+func (m *MessageRespository) readDBConnection() ([]MessageDBRegistry, error) {
 	var messages []MessageDBRegistry
+	file, err := m.dbConnection.Read()
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+	}
+
+	err = json.Unmarshal(file, &messages)
+	if err != nil {
+		return nil, fmt.Errorf("invalid JSON format in database file: %w", err)
+	}
+
+	return messages, nil
+}
+
+func getById(id uuid.UUID) (MessageRespository, error) {
+	messages, err := m.readDBConnection()
+	if err != nil {
+		return nil, fmt.Errorf("unable to read database file for message lookup: %w", err)
+	}
+
+	for _, message := range messages {
+		if message.Id == id {
+			return message.ToModel(), nil
+		}
+	}
+
+	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
+}
+
+
+func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
+  messages, err := m.readDBConnection()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, message := range messages {
+		if message.Id == id {
+			return message.ToModel(), nil
+		}
+	}
+	return nil, fmt.Errorf("message with id '%s' was not found in the database", id)
+}
+
+func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
 	var results []entities.Message
 
-	err := m.readDBConnection(&messages)
+	messages, err := m.readDBConnection()
 	if err != nil {
 		return nil, err
 	}
@@ -130,14 +147,22 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 }
 
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
-	var messages []MessageDBRegistry
-
-	err := m.readDBConnection(&messages)
+	messages, err := m.readDBConnection()
 	if err != nil {
 		return err
 	}
 
-	initialCountItemJSON := len(messages)
+	filters := entities.Filters{
+		Content: nil,
+		DateRange: nil,
+		TimesSent: nil,
+	}
+
+	currentMessagesCount, _ := m.GetMessages(filters)
+	// currentMessagesCount := len(messages)
+
+	fmt.Println("curr %w", len(*currentMessagesCount))
+	fmt.Println("total %w", len(*&messages))
 
 	for index, message := range messages {
 		if message.Id == id {
@@ -145,7 +170,9 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 		}
 	}
 
-	if (initialCountItemJSON) == len(messages) {
+	fmt.Println("total depois %w", len(*&messages))
+
+	if (currentMessagesCount) == len(*&messages) {
 		return fmt.Errorf("ID not found %s", id)
 	}
 
@@ -163,9 +190,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 }
 
 func (m *MessageRespository) InsertMessage(message entities.Message) error {
-	var messages []MessageDBRegistry
-
-	err := m.readDBConnection(&messages)
+	messages, err := m.readDBConnection()
 	if err != nil {
 		return err
 	}
