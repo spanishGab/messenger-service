@@ -40,23 +40,6 @@ func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
 	}
 }
 
-func matchTimesSend(value int8, filter entities.Filters) bool {
-	switch filter.TimesSent.Operator {
-	case "=":
-		return value == filter.TimesSent.Value
-	case "<":
-		return value < filter.TimesSent.Value
-	case "<=":
-		return value <= filter.TimesSent.Value
-	case ">":
-		return value > filter.TimesSent.Value
-	case ">=":
-		return value >= filter.TimesSent.Value
-	default: 
-		return true
-	}
-}
-
 func (m *MessageRespository) readTable() ([]MessageDBRegistry, error) {
 	var messages []MessageDBRegistry
 	file, err := m.dbConnection.Read()
@@ -118,7 +101,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 		}
 
 		if filters.TimesSent != nil {
-			if !matchTimesSend(message.TimesSent, filters) {
+			if !mathOperation(message.TimesSent, filters) {
 				continue
 			}
 		}

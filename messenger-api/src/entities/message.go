@@ -23,6 +23,23 @@ type TimesSent struct {
 	Operator string
 }
 
+func (ts *TimesSent) mathOperation(value int8) bool {
+	switch ts.Operator {
+	case "=":
+		return value == ts.Value
+	case "<":
+		return value < ts.Value
+	case "<=":
+		return value <= ts.Value
+	case ">":
+		return value > ts.Value
+	case ">=":
+		return value >= ts.Value
+	default: 
+		return true
+	}
+}
+
 type Filters struct {
 	Content *string
 	DateRange *DateRange 
