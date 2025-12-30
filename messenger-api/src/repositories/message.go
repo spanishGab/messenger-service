@@ -57,24 +57,24 @@ func matchTimesSend(value int8, filter entities.Filters) bool {
 	}
 }
 
-func (m *MessageRespository) readDBConnection() ([]MessageDBRegistry, error) {
+func (m *MessageRespository) readTable() ([]MessageDBRegistry, error) {
 	var messages []MessageDBRegistry
 	file, err := m.dbConnection.Read()
 
 	if err != nil {
-		return nil, fmt.Errorf("readDBConnection: unable to read database file for message lookup: %w", err)
+		return nil, fmt.Errorf("readTable: unable to read database file for message lookup: %w", err)
 	}
 
 	err = json.Unmarshal(file, &messages)
 	if err != nil {
-		return nil, fmt.Errorf("readDBConnection: invalid JSON format in database file: %w", err)
+		return nil, fmt.Errorf("readTable: invalid JSON format in database file: %w", err)
 	}
 
 	return messages, nil
 }
 
 func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
-  messages, err := m.readDBConnection()
+  messages, err := m.readTable()
 	if err != nil {
 		return nil, fmt.Errorf("getById: %w", err)
 	}
@@ -91,7 +91,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
 	var results []entities.Message
 
-	messages, err := m.readDBConnection()
+	messages, err := m.readTable()
 	if err != nil {
 		return nil, fmt.Errorf("getMessages: %w", err)
 	}
@@ -130,7 +130,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 }
 
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
-	messages, err := m.readDBConnection()
+	messages, err := m.readTable()
 	if err != nil {
 		return fmt.Errorf("deleteMessage: %w", err)
 	}
@@ -161,7 +161,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 }
 
 func (m *MessageRespository) InsertMessage(message entities.Message) error {
-	messages, err := m.readDBConnection()
+	messages, err := m.readTable()
 	if err != nil {
 		return fmt.Errorf("insertMessage: %w", err)
 	}
