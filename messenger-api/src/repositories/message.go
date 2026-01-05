@@ -143,7 +143,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 	return nil
 }
 
-func (m *MessageRespository) InsertMessage(message entities.Message) error {
+func (m *MessageRespository) InsertMessage(message *entities.Message) error {
 	messages, err := m.readTable()
 	if err != nil {
 		return fmt.Errorf("insertMessage: %w", err)
