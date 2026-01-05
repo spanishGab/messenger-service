@@ -10,7 +10,8 @@ type Message struct {
 	ID uuid.UUID `json:"id"`
 	Content string `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
-	TimesSent int8 `json:"times_sent"`
+	TimesSent uint8 `json:"times_sent"`
+}
 }
 
 type DateRange struct {
@@ -19,11 +20,11 @@ type DateRange struct {
 }
 
 type TimesSent struct {
-	Value int8
+	Value uint8
 	Operator string
 }
 
-func (ts *TimesSent) MathOperation(value int8) bool {
+func (ts *TimesSent) MathOperation(value uint8) bool {
 	switch ts.Operator {
 	case "=":
 		return value == ts.Value

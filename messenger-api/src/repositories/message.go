@@ -17,7 +17,7 @@ type MessageDBRegistry struct {
 	ID uuid.UUID `json:"id"`
 	Content string `json:"content"`
 	CreatedAt string `json:"created_at"`
-	TimesSent int8 `json:"times_sent"`
+	TimesSent uint8 `json:"times_sent"`
 }
 
 func (m *MessageDBRegistry) ToModel() *entities.Message{

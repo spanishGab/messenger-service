@@ -47,7 +47,7 @@ func main() {
 	// }
 
 	// timesSent := entities.TimesSent{
-	// 	Value: int8(2),
+	// 	Value: uint8(2),
 	// 	Operator: "=",
 	// }
 
