@@ -14,7 +14,7 @@ import (
 )
 
 type MessageDBRegistry struct {
-	Id uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id"`
 	Content string `json:"content"`
 	CreatedAt string `json:"created_at"`
 	TimesSent int8 `json:"times_sent"`
@@ -23,7 +23,7 @@ type MessageDBRegistry struct {
 func (m *MessageDBRegistry) ToModel() *entities.Message{
 	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
 	return &entities.Message{
-		Id: m.Id,
+		ID: m.ID,
 		Content: m.Content,
 		CreatedAt: createdAt,
 		TimesSent: m.TimesSent,
@@ -63,7 +63,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 	}
 
 	for _, message := range messages {
-		if message.Id == id {
+		if message.ID == id {
 			return message.ToModel(), nil
 		}
 	}
@@ -121,7 +121,7 @@ func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
 	currentMessagesCount := len(messages)
 
 	for index, message := range messages {
-		if message.Id == id {
+		if message.ID == id {
 			messages = slices.Delete(messages, index, index + 1)
 		}
 	}
@@ -150,7 +150,7 @@ func (m *MessageRespository) InsertMessage(message entities.Message) error {
 	}
 
 	newMessage := MessageDBRegistry{
-		Id: message.Id,
+		ID: message.ID,
 		Content: message.Content,
 		CreatedAt: message.CreatedAt.Format(shared.ShortDateFormat),
 		TimesSent: message.TimesSent,
