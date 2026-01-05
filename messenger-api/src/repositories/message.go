@@ -1,0 +1,172 @@
+package repositories
+
+import (
+	"encoding/json"
+	"fmt"
+	"messenger-api/src/db"
+	"messenger-api/src/entities"
+	"messenger-api/src/shared"
+	"slices"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type MessageDBRegistry struct {
+	Id uuid.UUID `json:"id"`
+	Content string `json:"content"`
+	CreatedAt string `json:"created_at"`
+	TimesSent int8 `json:"times_sent"`
+}
+
+func (m *MessageDBRegistry) ToModel() *entities.Message{
+	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
+	return &entities.Message{
+		Id: m.Id,
+		Content: m.Content,
+		CreatedAt: createdAt,
+		TimesSent: m.TimesSent,
+	}
+}
+
+type MessageRespository struct {
+	dbConnection db.FileHandler
+}
+
+func NewMessageRepository(dbConnection db.FileHandler) *MessageRespository {
+	return &MessageRespository{
+		dbConnection: dbConnection,
+	}
+}
+
+func (m *MessageRespository) readTable() ([]MessageDBRegistry, error) {
+	var messages []MessageDBRegistry
+	file, err := m.dbConnection.Read()
+
+	if err != nil {
+		return nil, fmt.Errorf("readTable: unable to read database file for message lookup: %w", err)
+	}
+
+	err = json.Unmarshal(file, &messages)
+	if err != nil {
+		return nil, fmt.Errorf("readTable: invalid JSON format in database file: %w", err)
+	}
+
+	return messages, nil
+}
+
+func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
+  messages, err := m.readTable()
+	if err != nil {
+		return nil, fmt.Errorf("getById: %w", err)
+	}
+
+	for _, message := range messages {
+		if message.Id == id {
+			return message.ToModel(), nil
+		}
+	}
+
+	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
+}
+
+func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
+	var results []entities.Message
+
+	messages, err := m.readTable()
+	if err != nil {
+		return nil, fmt.Errorf("getMessages: %w", err)
+	}
+
+	var filterContent string
+	if filters.Content != nil {
+		filterContent = *filters.Content
+	}
+
+	filterDateRange := filters.DateRange
+	for _, message := range messages {
+		if filterContent != "" {
+			if !strings.Contains(strings.ToLower(message.Content), filterContent) {
+				continue
+			}
+		}
+
+		if filterDateRange != nil {
+			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
+			if messageCreatedAt.Before(filterDateRange.Start) || 
+				messageCreatedAt.After(filterDateRange.End) {
+					continue
+				}
+		}
+
+		if filters.TimesSent != nil {
+			if !mathOperation(message.TimesSent, filters) {
+				continue
+			}
+		}
+
+		results = append(results, *message.ToModel())
+	}
+
+	return &results, nil
+}
+
+func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
+	messages, err := m.readTable()
+	if err != nil {
+		return fmt.Errorf("deleteMessage: %w", err)
+	}
+
+	currentMessagesCount := len(messages)
+
+	for index, message := range messages {
+		if message.Id == id {
+			messages = slices.Delete(messages, index, index + 1)
+		}
+	}
+
+	if (currentMessagesCount) == len(messages) {
+		return fmt.Errorf("deleteMessage: ID not found %s", id)
+	}
+
+	newData, err := json.MarshalIndent(messages, "", " ")
+	if err != nil {
+		return fmt.Errorf("deleteMessage: failed to encode updated data: %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("deleteMessage: failed to save database: %w", err)
+	}
+
+	return nil
+}
+
+func (m *MessageRespository) InsertMessage(message entities.Message) error {
+	messages, err := m.readTable()
+	if err != nil {
+		return fmt.Errorf("insertMessage: %w", err)
+	}
+
+	newMessage := MessageDBRegistry{
+		Id: message.Id,
+		Content: message.Content,
+		CreatedAt: message.CreatedAt.Format(shared.ShortDateFormat),
+		TimesSent: message.TimesSent,
+	}
+
+	messages = append(messages, newMessage)
+
+	newData, err := json.MarshalIndent(messages, " ", " ")
+	if err != nil {
+		return fmt.Errorf("insertMessage: failed to encode new data: %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("insertMessage: failed to save database: %w", err)
+	}
+
+	return nil
+}
