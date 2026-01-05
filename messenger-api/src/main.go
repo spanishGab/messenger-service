@@ -82,6 +82,7 @@ func main() {
 	// output, _ := json.MarshalIndent(message, "", "  ")
 	// fmt.Printf("Messages found:\n%+v\n", string(output))
 
+	// InsertMessage
 	message, err := entities.NewMessage("Buy Spanish book", 3)
 	if err != nil {
 		fmt.Println("failed to create new message:", err)
