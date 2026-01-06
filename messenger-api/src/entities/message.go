@@ -1,16 +1,44 @@
 package entities
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+const MAX_CONTENT_SIZE = 250
+const MAX_TIME_SENT_COUNT = 10
+
 type Message struct {
-	Id uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id"`
 	Content string `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
-	TimesSent int8 `json:"times_sent"`
+	TimesSent uint8 `json:"times_sent"`
+}
+
+func NewMessage(content string, timeSent uint8) (*Message, error) {
+	contentTreated := strings.TrimSpace(content)
+
+	if contentTreated == "" {
+		return nil, fmt.Errorf("content cannot be empty")
+	}
+
+	if len(content) > MAX_CONTENT_SIZE {
+		return nil, fmt.Errorf("'content' must have at most %v characters", MAX_CONTENT_SIZE)
+	}
+
+	if timeSent > MAX_TIME_SENT_COUNT {
+		return nil, fmt.Errorf("'time sent' must have at most %v characters", MAX_TIME_SENT_COUNT)
+	}
+
+	return &Message{
+		ID: uuid.New(),
+		Content: content,
+		CreatedAt: time.Now(),
+		TimesSent: timeSent,
+	}, nil
 }
 
 type DateRange struct {
@@ -19,11 +47,11 @@ type DateRange struct {
 }
 
 type TimesSent struct {
-	Value int8
+	Value uint8
 	Operator string
 }
 
-func (ts *TimesSent) mathOperation(value int8) bool {
+func (ts *TimesSent) MatchOperation(value uint8) bool {
 	switch ts.Operator {
 	case "=":
 		return value == ts.Value
