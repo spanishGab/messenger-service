@@ -47,7 +47,7 @@ func main() {
 	// }
 
 	// timesSent := entities.TimesSent{
-	// 	Value: int8(2),
+	// 	Value: uint8(2),
 	// 	Operator: "=",
 	// }
 
@@ -83,18 +83,14 @@ func main() {
 	// fmt.Printf("Messages found:\n%+v\n", string(output))
 
 	// InsertMessage
-	var id = uuid.New()
-	createdAt := time.Now()
-
-	message := entities.Message{
-		Id: id,
-		Content: "Buy milk",
-		CreatedAt: createdAt,
-		TimesSent: 1,
-	}
-	err = repo.InsertMessage(message)
+	message, err := entities.NewMessage("Buy Spanish book", 3)
 	if err != nil {
-		fmt.Println("failed to insert message '%w': %w", message)
+		fmt.Println("failed to create new message:", err)
+		return 
+	}
+
+	if err := repo.InsertMessage(message); err != nil {
+		fmt.Println("failed to insert message '%w':", message)
 		return 
 	}
 }
