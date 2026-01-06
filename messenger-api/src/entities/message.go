@@ -51,7 +51,7 @@ type TimesSent struct {
 	Operator string
 }
 
-func (ts *TimesSent) MathOperation(value uint8) bool {
+func (ts *TimesSent) MatchOperation(value uint8) bool {
 	switch ts.Operator {
 	case "=":
 		return value == ts.Value

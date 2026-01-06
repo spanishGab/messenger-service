@@ -101,7 +101,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 		}
 
 		if filters.TimesSent != nil {
-			if !filters.TimesSent.MathOperation(message.TimesSent) {
+			if !filters.TimesSent.MatchOperation(message.TimesSent) {
 				continue
 			}
 		}
