@@ -62,3 +62,28 @@ func (p *PersonRepository) GetById(id uuid.UUID) (*models.Person, error) {
 	}
 	return nil, fmt.Errorf("person with id '%s' not found", id)
 }
+
+func (p *PersonRepository) GetAll(limit uint8, offset uint8) ([]*models.Person, error) {
+	var persons []PersonDBRegistry
+
+	personsDBTable, err := p.dbConnection.Read()
+	if err != nil {
+		fmt.Printf("Error on PersonRepository.GetAll: %s\n", err)
+		return nil, err
+	}
+	err = json.Unmarshal(personsDBTable, &persons)
+
+	if err != nil {
+		fmt.Printf("Error on PersonRepository.GetAll: %s\n", err)
+		return nil, err
+	}
+
+	start := int(limit * offset)
+	end := start + int(limit)
+	var personModels []*models.Person
+	for i := start; i < end && i < len(persons); i++ {
+		personModels = append(personModels, persons[i].ToModel())
+	}
+
+	return personModels, nil
+}

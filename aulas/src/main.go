@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 	"spanishGab/aula_camada_model/src/db"
+	"spanishGab/aula_camada_model/src/handlers"
 	"spanishGab/aula_camada_model/src/repositories"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -17,11 +15,19 @@ func main() {
 	dbConnection.Connect()
 
 	repo := repositories.NewPersonRepository(*dbConnection)
-	person, err := repo.GetById(uuid.MustParse("93dbd07d-f050-447a-9ad7-ec52b8741c3f"))
-	if person == nil {
-		fmt.Println("Person not found", err)
+	controller := handlers.NewPersonHandler(*repo)
+
+	command := handlers.Command{
+		Type: handlers.List,
+		Data: map[string]string{
+			"limit":  "1",
+			"offset": "-1",
+		},
+	}
+	result, err := controller.GetPersons(command)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
 		return
 	}
-	output, _ := json.MarshalIndent(person, "", "  ")
-	fmt.Printf("%s", string(output))
+	fmt.Printf("%s", string(result))
 }
