@@ -3,13 +3,10 @@ package main
 import (
 	"fmt"
 	"messenger-api/src/db"
-	"messenger-api/src/entities"
+	"messenger-api/src/handlers"
 	"messenger-api/src/repositories"
 	"os"
 	"path"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -23,17 +20,22 @@ func main() {
 	dbConnection.Connection()
 
 	repo := repositories.NewMessageRepository(*dbConnection)
+	controller := handlers.NewMessageHandle(*repo)
 
-	// // GetById
-	// var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
-	// message, err := repo.GetById(id)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with ID '%w': %w", id, err)
-	// 	return 
-	// }
+	// GetById
+	command := handlers.Command{
+		Type: handlers.List,
+		Data: map[string]string{
+			"id": "b829bb89-01e3-4466-8138-452d8fbeaedf",
+		},
+	}
 
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Message found:\n%+v\n", string(output))
+	result, err := controller.GetMessageById(command)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return 
+	}
+	fmt.Printf("%s \n", string(result))
 
 	// // GetMessages
 	// content := "message"
@@ -82,15 +84,18 @@ func main() {
 	// output, _ := json.MarshalIndent(message, "", "  ")
 	// fmt.Printf("Messages found:\n%+v\n", string(output))
 
-	// InsertMessage
-	message, err := entities.NewMessage("Buy Spanish book", 3)
-	if err != nil {
-		fmt.Println("failed to create new message:", err)
-		return 
-	}
+	// // InsertMessage
+	// message, err := entities.NewMessage("Buy Spanish book", 3)
+	// if err != nil {
+	// 	fmt.Println("failed to create new message:", err)
+	// 	return 
+	// }
 
-	if err := repo.InsertMessage(message); err != nil {
-		fmt.Println("failed to insert message '%w':", message)
-		return 
-	}
+	// if err := repo.InsertMessage(message); err != nil {
+	// 	fmt.Println("failed to insert message '%w':", message)
+	// 	return 
+	// }
+
+	// 
+
 }
