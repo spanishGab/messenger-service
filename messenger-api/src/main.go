@@ -64,25 +64,26 @@ func main() {
 		},
 	}
 
-	result, err := controller.DeleteMessage(deleteMessage)
+	deleteResult, err := controller.DeleteMessage(deleteMessage)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return 
 	}
-	fmt.Printf("%s \n", string(result))
+	fmt.Printf("%s \n", string(deleteResult))
 
-	// // InsertMessage
-	// message, err := entities.NewMessage("Buy Spanish book", 3)
-	// if err != nil {
-	// 	fmt.Println("failed to create new message:", err)
-	// 	return 
-	// }
+	// InsertMessage
+	insertMessage := handlers.Command{
+		Type: handlers.Create,
+		Data: map[string]string{
+			"content": "Buy a new planner",
+			"timesSent": "2",
+		},
+	}
 
-	// if err := repo.InsertMessage(message); err != nil {
-	// 	fmt.Println("failed to insert message '%w':", message)
-	// 	return 
-	// }
-
-	// 
-
+	insertResult, err := controller.InsertMessage(insertMessage)
+		if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return 
+	}
+	fmt.Printf("%s \n", string(insertResult))
 }

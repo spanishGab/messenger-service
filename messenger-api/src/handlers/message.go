@@ -138,3 +138,33 @@ func (mh *MessageHandle) DeleteMessage(command Command) (string, error) {
 	return "delecao feita com sucesso", nil
 }
 
+func (mh *MessageHandle) InsertMessage(command Command) (string, error) {
+	content, ok := command.Data["content"]
+	if !ok {
+		return "", fmt.Errorf("content must be provided")
+	}
+
+	unparsedTimesSent, ok := command.Data["timesSent"]
+	if !ok {
+		return "", fmt.Errorf("timesSent must be provided")
+	}
+
+	parsedTimesSent, _ := strconv.ParseUint(unparsedTimesSent, 10, 8)
+	if !ok {
+		return "", fmt.Errorf("parsedTimesSent nao foi possivel")
+	}
+
+	timesSent := uint8(parsedTimesSent)
+	messange, err := entities.NewMessage(content, timesSent)
+	if err != nil {
+		return "", fmt.Errorf("newMessage nao foi possivel")
+	}
+
+	response, err := json.MarshalIndent(messange, " ", "")
+	if err != nil {
+		return "", fmt.Errorf("error formatting response")
+	}
+
+	return string(response), nil
+}
+
