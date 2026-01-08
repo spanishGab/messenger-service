@@ -4,8 +4,8 @@ type CommandType string
 
 const (
 	Create CommandType = "CREATE"
+	ListById CommandType = "LIST_BY_ID"
 	List CommandType = "LIST"
-	ListByFilters CommandType = "LIST_BY_FILTERS"
 	Update CommandType = "UPDATE"
 	Delete CommandType = "DELETE"
 )
