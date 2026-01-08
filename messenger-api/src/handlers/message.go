@@ -54,7 +54,7 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedCreatedAtStart != "" {
 		parsed, err := time.Parse(shared.ShortDateFormat, unparsedCreatedAtStart)
 		if err != nil {
-			return "", fmt.Errorf("erro ao parsear createdAtStart")
+			return "", fmt.Errorf("error parsing createdAtStart")
 		}
 		createdAtStart = parsed
 	}
@@ -64,7 +64,7 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedCreatedAtEnd != "" {
 		parsed, err := time.Parse(shared.ShortDateFormat, unparsedCreatedAtEnd)
 		if err != nil {
-			return "", fmt.Errorf("erro ao parsear createdAtEnd")
+			return "", fmt.Errorf("error parsing createdAtEnd")
 		}
 		createdAtEnd = &parsed
 	}
@@ -74,7 +74,7 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedTimesSentValue != "" {
 		parsed, err := strconv.ParseUint(unparsedTimesSentValue, 10, 8) 
 		if err != nil {
-			return "", fmt.Errorf("erro")
+			return "", fmt.Errorf("error parsing timesSentValue")
 		}
 		parsedUint8 := uint8(parsed)
 		timesSentValue = parsedUint8
@@ -127,15 +127,15 @@ func (mh *MessageHandle) DeleteMessage(command Command) (string, error) {
 
 	id, err := uuid.Parse(unparsedId)
 	if err != nil {
-		return "", fmt.Errorf("id")
+		return "", fmt.Errorf("error parsing id")
 	}
 
 	err = mh.messageRepository.DeleteMessage(id)
 	if err != nil {
-		return "", fmt.Errorf("tst")
+		return "", fmt.Errorf("error deleting message")
 	}
 
-	return "delecao feita com sucesso", nil
+	return fmt.Sprintf("Message from ID %s deleted successfully", id), nil
 }
 
 func (mh *MessageHandle) InsertMessage(command Command) (string, error) {
@@ -149,15 +149,15 @@ func (mh *MessageHandle) InsertMessage(command Command) (string, error) {
 		return "", fmt.Errorf("timesSent must be provided")
 	}
 
-	parsedTimesSent, _ := strconv.ParseUint(unparsedTimesSent, 10, 8)
-	if !ok {
-		return "", fmt.Errorf("parsedTimesSent nao foi possivel")
+	parsedTimesSent, err := strconv.ParseUint(unparsedTimesSent, 10, 8)
+	if err != nil {
+		return "", fmt.Errorf("error parsing timesSent")
 	}
 
 	timesSent := uint8(parsedTimesSent)
 	messange, err := entities.NewMessage(content, timesSent)
 	if err != nil {
-		return "", fmt.Errorf("newMessage nao foi possivel")
+		return "", fmt.Errorf("error inserting message")
 	}
 
 	response, err := json.MarshalIndent(messange, " ", "")
