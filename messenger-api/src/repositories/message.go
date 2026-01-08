@@ -95,7 +95,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 		if filterDateRange != nil {
 			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
 			if messageCreatedAt.Before(filterDateRange.Start) || 
-				messageCreatedAt.After(filterDateRange.End) {
+				messageCreatedAt.After(*filterDateRange.End) {
 					continue
 				}
 		}

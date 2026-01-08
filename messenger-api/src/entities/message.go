@@ -43,7 +43,7 @@ func NewMessage(content string, timeSent uint8) (*Message, error) {
 
 type DateRange struct {
 	Start time.Time 
-	End time.Time
+	End *time.Time
 }
 
 type TimesSent struct {
