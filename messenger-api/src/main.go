@@ -23,41 +23,39 @@ func main() {
 	controller := handlers.NewMessageHandle(*repo)
 
 	// GetById
-	command := handlers.Command{
-		Type: handlers.List,
+	listById := handlers.Command{
+		Type: handlers.ListById,
 		Data: map[string]string{
 			"id": "b829bb89-01e3-4466-8138-452d8fbeaedf",
 		},
 	}
 
-	result, err := controller.GetMessageById(command)
+	messageById, err := controller.GetMessageById(listById)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return 
 	}
-	fmt.Printf("%s \n", string(result))
+	fmt.Printf("%s \n", string(messageById))
 
-	// // GetMessages
-	// content := "message"
+	// GetMessages
+	list := handlers.Command{
+		Type: handlers.List,
+		Data: map[string]string{
+			"content": "buy",
+			"createdAtStart": "2025-12-11",
+			"createdAtEnd": "2025-12-12",
+			"timesSentValue": "2",
+			"timesSentOperator": "=",
+		},
+	}
 
-	// startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
-	// endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
+	messangeList, err := controller.GetMessages(list)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return 
+	}
+	fmt.Printf("%s \n", string(messangeList))
 
-	// dateRange := entities.DateRange{
-	// 	Start: startDate,
-	// 	End: endDate,
-	// }
-
-	// timesSent := entities.TimesSent{
-	// 	Value: uint8(2),
-	// 	Operator: "=",
-	// }
-
-	// filters := entities.Filters{
-	// 	Content: &content,
-	// 	DateRange: &dateRange,
-	// 	TimesSent: &timesSent,
-	// }
 
 	// message, err := repo.GetMessages(filters)
 	// if err != nil {
