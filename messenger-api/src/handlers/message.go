@@ -119,3 +119,22 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	return string(response), nil
 }
 
+func (mh *MessageHandle) DeleteMessage(command Command) (string, error) {
+	unparsedId, ok := command.Data["id"]
+	if !ok {
+		return "", fmt.Errorf("id must be provided")
+	}
+
+	id, err := uuid.Parse(unparsedId)
+	if err != nil {
+		return "", fmt.Errorf("id")
+	}
+
+	err = mh.messageRepository.DeleteMessage(id)
+	if err != nil {
+		return "", fmt.Errorf("tst")
+	}
+
+	return "delecao feita com sucesso", nil
+}
+

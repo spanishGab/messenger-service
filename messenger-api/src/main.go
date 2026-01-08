@@ -56,31 +56,20 @@ func main() {
 	}
 	fmt.Printf("%s \n", string(messangeList))
 
+	// DeleteMessages
+	deleteMessage := handlers.Command{
+		Type: handlers.Delete,
+		Data: map[string]string{
+			"id": "8849e12f-f6a6-4f8e-ad58-d50f2b0a443e",
+		},
+	}
 
-	// message, err := repo.GetMessages(filters)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
-	// 	return 
-	// }
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Message found:\n%+v\n", string(output))
-
-	// // DeleteMessages
-	// var id = uuid.MustParse("30bcc896-deba-44da-813c-5d52c9de42b9")
-	// err = repo.DeleteMessage(id)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// filters := entities.Filters{}
-	// message, err := repo.GetMessages(filters)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
-	// 	return 
-	// }
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Messages found:\n%+v\n", string(output))
+	result, err := controller.DeleteMessage(deleteMessage)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return 
+	}
+	fmt.Printf("%s \n", string(result))
 
 	// // InsertMessage
 	// message, err := entities.NewMessage("Buy Spanish book", 3)
