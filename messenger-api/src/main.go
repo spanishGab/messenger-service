@@ -56,7 +56,7 @@ func main() {
 	}
 	fmt.Printf("%s \n", string(messangeList))
 
-	// DeleteMessages
+	// DeleteMessage 
 	deleteMessage := handlers.Command{
 		Type: handlers.Delete,
 		Data: map[string]string{
@@ -86,4 +86,21 @@ func main() {
 		return 
 	}
 	fmt.Printf("%s \n", string(insertResult))
+
+	// UpdateMessage
+	updateMessage := handlers.Command{
+		Type: handlers.Update,
+		Data: map[string]string{
+			"id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
+			"content": "Talk about money",
+			"timesSent": "10",
+		},
+	}
+
+	updateResult, err := controller.UpdateMessage(updateMessage)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return 
+	}
+	fmt.Printf("%s \n", string(updateResult))
 }

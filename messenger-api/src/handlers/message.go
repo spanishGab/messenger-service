@@ -168,3 +168,43 @@ func (mh *MessageHandle) InsertMessage(command Command) (string, error) {
 	return string(response), nil
 }
 
+func (mh *MessageHandle) UpdateMessage(command Command) (string, error) {
+	unparsedID, ok := command.Data["id"]
+	if !ok {
+		return "", fmt.Errorf("id must be provided")
+	}
+
+	id, err := uuid.Parse(unparsedID)
+	if err != nil {
+		return "", fmt.Errorf("id is not valid")
+	}
+
+	content, ok := command.Data["content"]
+	if !ok {
+		return "", fmt.Errorf("content must be provided")
+	}
+
+	unparsedTimesSent, ok := command.Data["timesSent"]
+	if !ok {
+		return "", fmt.Errorf("timesSent must be provided")
+	}
+
+	parsedTimesSent, err := strconv.ParseUint(unparsedTimesSent, 10, 8) 
+	if err != nil {
+		return "", fmt.Errorf("error parsing timesSent")
+	}
+
+	timesSent := uint8(parsedTimesSent)
+
+	data := &entities.MessageUpdate{
+		Content: &content,
+		TimesSent: &timesSent,
+	}
+
+	err = mh.messageRepository.UpdateMessage(id, data)
+	if err != nil {
+		return "", fmt.Errorf("error updated message")
+	}
+
+	return fmt.Sprintf("Message from ID %s updated successfully", id), nil
+}
