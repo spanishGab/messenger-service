@@ -73,3 +73,8 @@ type Filters struct {
 	DateRange *DateRange 
 	TimesSent *TimesSent
 }
+
+type MessageUpdate struct {
+	Content *string
+	TimesSent *TimesSent
+}

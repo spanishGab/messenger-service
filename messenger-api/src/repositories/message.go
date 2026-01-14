@@ -175,3 +175,37 @@ func (m *MessageRespository) InsertMessage(message *entities.Message) error {
 
 	return nil
 }
+
+func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *entities.MessageUpdate) error {
+	messages, err := m.readTable()
+	if err != nil {
+		return fmt.Errorf("updateMessage: %w", err)
+	}
+
+	for index, message := range messages {
+		if id == message.ID {
+
+			if data.Content != nil {
+				message.Content = *data.Content
+			}
+
+			if data.TimesSent != nil {
+				message.TimesSent = *&data.TimesSent.Value
+			}
+
+			messages[index] = message
+		}
+	}
+
+	newData, err := json.MarshalIndent(messages, "", " ")
+	if err != nil {
+		return fmt.Errorf("updateMessage: marshal %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("updateMessage: failed to save database: %w", err)
+	}
+
+	return nil
+}
