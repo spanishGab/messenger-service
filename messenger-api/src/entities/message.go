@@ -30,7 +30,7 @@ func NewMessage(content string, timesSent uint8) (*Message, error) {
 	}
 
 	if timesSent > MAX_TIME_SENT_COUNT {
-		return nil, fmt.Errorf("'time sent' must have at most %v characters", MAX_TIME_SENT_COUNT)
+		return nil, fmt.Errorf("'time sent' must be less than or equal to %v", MAX_TIME_SENT_COUNT)
 	}
 
 	return &Message{
@@ -76,5 +76,5 @@ type Filters struct {
 
 type MessageUpdate struct {
 	Content *string
-	TimesSent *TimesSent
+	TimesSent *uint8
 }
