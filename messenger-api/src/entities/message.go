@@ -78,3 +78,8 @@ type MessageUpdate struct {
 	Content *string
 	TimesSent *uint8
 }
+
+type Result struct {
+	Value *string
+	Error error
+}

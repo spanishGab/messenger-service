@@ -22,31 +22,42 @@ func NewMessageHandle(messageRepository repositories.MessageRespository) *Messag
 	}
 }
 
-func (mh *MessageHandle) GetMessageById(command Command) (string, error) {
+func (mh *MessageHandle) GetMessageById(command Command) (entities.Result) {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
-		return "", fmt.Errorf("id must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("id must be provided"),
+		}
 	}
 
 	parsedID, err := uuid.Parse(unparsedID)
 	if err != nil {
-		return "", fmt.Errorf("id is not valid")
+		return entities.Result{
+			Error: fmt.Errorf("id is not valid"),
+		}
 	}
 
 	message, err := mh.messageRepository.GetById(parsedID)
 	if err != nil {
-		return "", fmt.Errorf("error while searching for message")
+		return entities.Result{
+			Error: fmt.Errorf("error while searching for message"),
+		}
 	}
 
-	response, err := json.MarshalIndent(message, " ", "")
+	unparsedResponse, err := json.MarshalIndent(message, " ", "")
 	if err != nil {
-		return "", fmt.Errorf("error formatting response")
+		return entities.Result{
+			Error: fmt.Errorf("error formatting response"),
+		}
 	}
 
-	return string(response), nil
+	response := string(unparsedResponse)
+	return entities.Result{
+		Value: &response,
+	}
 }
 
-func (mh *MessageHandle) GetMessages(command Command) (string, error) {
+func (mh *MessageHandle) GetMessages(command Command) (entities.Result) {
 	content, _ := command.Data["content"]
 
 	unparsedCreatedAtStart, _ := command.Data["createdAtStart"]
@@ -54,7 +65,9 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedCreatedAtStart != "" {
 		parsed, err := time.Parse(shared.ShortDateFormat, unparsedCreatedAtStart)
 		if err != nil {
-			return "", fmt.Errorf("error parsing createdAtStart")
+			return entities.Result{
+				Error: fmt.Errorf("error parsing createdAtStart"),
+			}
 		}
 		createdAtStart = parsed
 	}
@@ -64,7 +77,9 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedCreatedAtEnd != "" {
 		parsed, err := time.Parse(shared.ShortDateFormat, unparsedCreatedAtEnd)
 		if err != nil {
-			return "", fmt.Errorf("error parsing createdAtEnd")
+			return entities.Result{
+				Error: fmt.Errorf("error parsing createdAtEnd"),
+			}
 		}
 		createdAtEnd = &parsed
 	}
@@ -74,7 +89,9 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 	if unparsedTimesSentValue != "" {
 		parsed, err := strconv.ParseUint(unparsedTimesSentValue, 10, 8) 
 		if err != nil {
-			return "", fmt.Errorf("error parsing timesSentValue")
+			return entities.Result{
+				Error: fmt.Errorf("error parsing timesSentValue"),
+			}
 		}
 		parsedUint8 := uint8(parsed)
 		timesSentValue = parsedUint8
@@ -108,90 +125,131 @@ func (mh *MessageHandle) GetMessages(command Command) (string, error) {
 
 	messages, err := mh.messageRepository.GetMessages(filters)
 	if err != nil {
-		return "", fmt.Errorf("error while searching for message")
+		return entities.Result{
+			Error: fmt.Errorf("error while searching for message"),
+		}
 	}
 
-	response, err := json.MarshalIndent(messages, " ", "")
+	unparsedResponse, err := json.MarshalIndent(messages, " ", "")
 	if err != nil {
-		return "", fmt.Errorf("error formatting response")
+		return entities.Result{
+			Error: fmt.Errorf("error formatting response"),
+		}
 	}
 
-	return string(response), nil
+	response := string(unparsedResponse)
+	return entities.Result{
+		Value: &response,
+	}
 }
 
-func (mh *MessageHandle) DeleteMessage(command Command) (string, error) {
+func (mh *MessageHandle) DeleteMessage(command Command) (entities.Result) {
 	unparsedId, ok := command.Data["id"]
 	if !ok {
-		return "", fmt.Errorf("id must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("id must be provided"),
+		}
 	}
 
 	id, err := uuid.Parse(unparsedId)
 	if err != nil {
-		return "", fmt.Errorf("error parsing id")
+		return entities.Result{
+			Error: fmt.Errorf("error parsing id"),
+		}
 	}
 
 	err = mh.messageRepository.DeleteMessage(id)
 	if err != nil {
-		return "", fmt.Errorf("error deleting message")
+		return entities.Result{
+			Error: fmt.Errorf("error deleting message"),
+		}
 	}
 
-	return fmt.Sprintf("Message from ID %s deleted successfully", id), nil
+	unparsedResponse := fmt.Sprintf("Message from ID %s deleted successfully", id)
+	response := string(unparsedResponse)
+	return entities.Result{
+		Value: &response,
+	}
 }
 
-func (mh *MessageHandle) InsertMessage(command Command) (string, error) {
+func (mh *MessageHandle) InsertMessage(command Command) (entities.Result) {
 	content, ok := command.Data["content"]
 	if !ok {
-		return "", fmt.Errorf("content must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("content must be provided"),
+		}
 	}
 
 	unparsedTimesSent, ok := command.Data["timesSent"]
 	if !ok {
-		return "", fmt.Errorf("timesSent must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("timesSent must be provided"),
+		}
 	}
 
 	parsedTimesSent, err := strconv.ParseUint(unparsedTimesSent, 10, 8)
 	if err != nil {
-		return "", fmt.Errorf("error parsing timesSent")
+		return entities.Result{
+			Error: fmt.Errorf("error parsing timesSent"),
+		}
 	}
 
 	timesSent := uint8(parsedTimesSent)
 	messange, err := entities.NewMessage(content, timesSent)
 	if err != nil {
-		return "", fmt.Errorf("error inserting message")
+		return entities.Result{
+			Error: fmt.Errorf("error inserting message"),
+		}
 	}
 
-	response, err := json.MarshalIndent(messange, " ", "")
+	err = mh.messageRepository.InsertMessage(messange)
 	if err != nil {
-		return "", fmt.Errorf("error formatting response")
+		return entities.Result{
+			Error: fmt.Errorf("error insert message"),
+		}
 	}
 
-	return string(response), nil
+	unparsedResponse := fmt.Sprintf("Message from created successfully")
+	response := string(unparsedResponse)
+	return entities.Result{
+		Value: &response,
+	}
 }
 
-func (mh *MessageHandle) UpdateMessage(command Command) (string, error) {
+func (mh *MessageHandle) UpdateMessage(command Command) (entities.Result) {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
-		return "", fmt.Errorf("id must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("id must be provided"),
+		}
 	}
 
 	id, err := uuid.Parse(unparsedID)
 	if err != nil {
-		return "", fmt.Errorf("id is not valid")
+		return entities.Result{
+			Error: fmt.Errorf("id is not valid"),
+		}
 	}
 
 	content, ok := command.Data["content"]
 	if !ok {
-		return "", fmt.Errorf("content must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("content must be provided"),
+		}
 	}
 
 	unparsedTimesSent, ok := command.Data["timesSent"]
 	if !ok {
-		return "", fmt.Errorf("timesSent must be provided")
+		return entities.Result{
+			Error: fmt.Errorf("timesSent must be provided"),
+		}
 	}
 
 	parsedTimesSent, err := strconv.ParseUint(unparsedTimesSent, 10, 8) 
 	if err != nil {
-		return "", fmt.Errorf("error parsing timesSent")
+		return entities.Result{
+			Error: fmt.Errorf("error parsing timesSent"),
+		}
 	}
 
 	timesSent := uint8(parsedTimesSent)
@@ -203,8 +261,14 @@ func (mh *MessageHandle) UpdateMessage(command Command) (string, error) {
 
 	err = mh.messageRepository.UpdateMessage(id, data)
 	if err != nil {
-		return "", fmt.Errorf("error updated message")
+		return entities.Result{
+			Error: fmt.Errorf("error updated message"),
+		}
 	}
 
-	return fmt.Sprintf("Message from ID %s updated successfully", id), nil
+	unparsedResponse := fmt.Sprintf("Message from ID %s updated successfully", id)
+	response := string(unparsedResponse)
+	return entities.Result{
+		Value: &response,
+	}
 }
