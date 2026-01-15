@@ -26,50 +26,50 @@ func main() {
 	listById := handlers.Command{
 		Type: handlers.ListById,
 		Data: map[string]string{
-			"id": "b829bb89-01e3-4466-8138-452d8fbeaedf",
+			"id": "8f5eadea-c459-41d9-ae74-dc7164d9483b",
 		},
 	}
 
-	messageById, err := controller.GetMessageById(listById)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+	messageById := controller.GetMessageById(listById)
+	if messageById.Error != nil {
+		fmt.Printf("Error: %s\n", messageById.Error)
 		return 
 	}
-	fmt.Printf("%s \n", string(messageById))
+	fmt.Printf("%s \n", string(*messageById.Value))
 
 	// GetMessages
 	list := handlers.Command{
 		Type: handlers.List,
 		Data: map[string]string{
 			"content": "buy",
-			"createdAtStart": "2025-12-11",
-			"createdAtEnd": "2025-12-12",
+			"createdAtStart": "2026-01-05",
+			"createdAtEnd": "2026-01-05",
 			"timesSentValue": "2",
-			"timesSentOperator": "=",
+			"timesSentOperator": ">=",
 		},
 	}
 
-	messangeList, err := controller.GetMessages(list)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+	messangeList := controller.GetMessages(list)
+	if messangeList.Error != nil {
+		fmt.Printf("Error: %s\n", messangeList.Error)
 		return 
 	}
-	fmt.Printf("%s \n", string(messangeList))
+	fmt.Printf("%s \n", string(*messangeList.Value))
 
 	// DeleteMessage 
 	deleteMessage := handlers.Command{
 		Type: handlers.Delete,
 		Data: map[string]string{
-			"id": "8849e12f-f6a6-4f8e-ad58-d50f2b0a443e",
+			"id": "45f88db2-d973-44cf-abd4-4bda898d8ef6",
 		},
 	}
 
-	deleteResult, err := controller.DeleteMessage(deleteMessage)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+	deleteResult := controller.DeleteMessage(deleteMessage)
+	if deleteResult.Error != nil {
+		fmt.Printf("Error: %s\n", deleteResult.Error)
 		return 
 	}
-	fmt.Printf("%s \n", string(deleteResult))
+	fmt.Printf("%s \n", string(*deleteResult.Value))
 
 	// InsertMessage
 	insertMessage := handlers.Command{
@@ -80,12 +80,12 @@ func main() {
 		},
 	}
 
-	insertResult, err := controller.InsertMessage(insertMessage)
-		if err != nil {
-		fmt.Printf("Error: %s\n", err)
+	insertResult := controller.InsertMessage(insertMessage)
+	if insertResult.Error != nil {
+		fmt.Printf("Error: %s\n", insertResult.Error)
 		return 
 	}
-	fmt.Printf("%s \n", string(insertResult))
+	fmt.Printf("%s \n", string(*insertResult.Value))
 
 	// UpdateMessage
 	updateMessage := handlers.Command{
@@ -93,14 +93,14 @@ func main() {
 		Data: map[string]string{
 			"id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
 			"content": "Talk about money",
-			"timesSent": "10",
+			"timesSent": "1",
 		},
 	}
 
-	updateResult, err := controller.UpdateMessage(updateMessage)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+	updateResult := controller.UpdateMessage(updateMessage)
+	if updateResult.Error != nil {
+		fmt.Printf("Error: %s\n", updateResult.Error)
 		return 
 	}
-	fmt.Printf("%s \n", string(updateResult))
+	fmt.Printf("%s \n", string(*updateResult.Value))
 }
