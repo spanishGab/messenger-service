@@ -83,3 +83,8 @@ type Result struct {
 	Value *string
 	Error error
 }
+
+type Pagination struct {
+	Page *uint8
+	PageSize *uint8
+}

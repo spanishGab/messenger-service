@@ -123,7 +123,38 @@ func (mh *MessageHandle) GetMessages(command Command) (entities.Result) {
 		TimesSent: &timesSent,
 	}
 
-	messages, err := mh.messageRepository.GetMessages(filters)
+	unparsedPage, _ := command.Data["page"]
+	var page uint8
+	if unparsedPage != "" {
+		parsed, err := strconv.ParseUint(unparsedPage, 10, 8)
+		if err != nil {
+			return entities.Result{
+				Error: fmt.Errorf("error parsing 'page'"),
+			}
+		}
+		parsedUint8 := uint8(parsed)
+		page = parsedUint8
+	}
+
+	unparsedPageSize, _ := command.Data["pageSize"]
+	var pageSize uint8
+	if unparsedPageSize != "" {
+		parsed, err := strconv.ParseUint(unparsedPageSize, 10, 8)
+		if err != nil {
+			return entities.Result{
+				Error: fmt.Errorf("error parsing 'pageSize'"),
+			}
+		}
+		parsedUint8 := uint8(parsed)
+		pageSize = parsedUint8
+	}
+
+	pagination := entities.Pagination{
+		Page: &page,
+		PageSize: &pageSize,
+	}
+
+	messages, err := mh.messageRepository.GetMessages(filters, pagination)
 	if err != nil {
 		return entities.Result{
 			Error: fmt.Errorf("error while searching for message"),
