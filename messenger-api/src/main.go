@@ -42,10 +42,12 @@ func main() {
 		Type: handlers.List,
 		Data: map[string]string{
 			"content": "buy",
-			"createdAtStart": "2026-01-05",
-			"createdAtEnd": "2026-01-05",
+			"createdAtStart": "2026-01-19",
+			"createdAtEnd": "2026-01-19",
 			"timesSentValue": "2",
 			"timesSentOperator": ">=",
+			"page": "3",
+			"pageSize": "1",
 		},
 	}
 
@@ -75,7 +77,7 @@ func main() {
 	insertMessage := handlers.Command{
 		Type: handlers.Create,
 		Data: map[string]string{
-			"content": "Buy a new planner",
+			"content": "Buy cake",
 			"timesSent": "2",
 		},
 	}
