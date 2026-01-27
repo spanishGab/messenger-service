@@ -65,8 +65,7 @@ func paginateInMemory(items []entities.Message, page uint8, pageSize uint8) ([]e
 		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
 	}
 
-	unparsedItemsSize := len(items)
-	itemsSize := uint8(unparsedItemsSize)
+	itemsSize := uint8(len(items))
 
 	start := (page - 1) * pageSize
 	if start >= itemsSize {
