@@ -10,11 +10,6 @@ const (
 	Delete CommandType = "DELETE"
 )
 
-type DateRangeDTO struct {
-	Start string
-	End  string
-}
-
 type Command struct {
 	Type CommandType
 	Data map[string]string

@@ -17,17 +17,17 @@ type Result struct {
 	Error error
 }
 
-type MessageHandle struct {
+type MessageHandler struct {
 	messageRepository repositories.MessageRespository
 }
 
-func NewMessageHandle(messageRepository repositories.MessageRespository) *MessageHandle {
-	return &MessageHandle{
+func NewMessageHandle(messageRepository repositories.MessageRespository) *MessageHandler {
+	return &MessageHandler{
 		messageRepository: messageRepository,
 	}
 }
 
-func (mh *MessageHandle) GetMessageById(command Command) (Result) {
+func (mh *MessageHandler) GetMessageById(command Command) (Result) {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
 		return Result{
@@ -62,7 +62,7 @@ func (mh *MessageHandle) GetMessageById(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandle) GetMessages(command Command) (Result) {
+func (mh *MessageHandler) GetMessages(command Command) (Result) {
 	content, _ := command.Data["content"]
 
 	unparsedCreatedAtStart, _ := command.Data["createdAtStart"]
@@ -179,7 +179,7 @@ func (mh *MessageHandle) GetMessages(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandle) DeleteMessage(command Command) (Result) {
+func (mh *MessageHandler) DeleteMessage(command Command) (Result) {
 	unparsedId, ok := command.Data["id"]
 	if !ok {
 		return Result{
@@ -208,7 +208,7 @@ func (mh *MessageHandle) DeleteMessage(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandle) InsertMessage(command Command) (Result) {
+func (mh *MessageHandler) InsertMessage(command Command) (Result) {
 	content, ok := command.Data["content"]
 	if !ok {
 		return Result{
@@ -252,7 +252,7 @@ func (mh *MessageHandle) InsertMessage(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandle) UpdateMessage(command Command) (Result) {
+func (mh *MessageHandler) UpdateMessage(command Command) (Result) {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
 		return Result{
