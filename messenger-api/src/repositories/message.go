@@ -101,7 +101,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
 }
 
-func (m *MessageRespository) GetMessages(filters entities.Filters, pagination entities.Pagination) (*[]entities.Message, error) {
+func (m *MessageRespository) GetMessages(filters entities.MessageFiltersDTO, pagination entities.PaginationDTO) (*[]entities.Message, error) {
 	var data []entities.Message
 
 	messages, err := m.readTable()
@@ -211,7 +211,7 @@ func (m *MessageRespository) InsertMessage(message *entities.Message) error {
 	return nil
 }
 
-func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *entities.MessageUpdate) error {
+func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *entities.MessageUpdateDTO) error {
 	messages, err := m.readTable()
 	if err != nil {
 		return fmt.Errorf("updateMessage: %w", err)

@@ -117,7 +117,7 @@ func (mh *MessageHandle) GetMessages(command Command) (entities.Result) {
 		}
 	}
 
-	filters := entities.Filters{
+	filters := entities.MessageFiltersDTO{
 		Content: &content,
 		DateRange: &dateRange,
 		TimesSent: &timesSent,
@@ -149,7 +149,7 @@ func (mh *MessageHandle) GetMessages(command Command) (entities.Result) {
 		pageSize = parsedUint8
 	}
 
-	pagination := entities.Pagination{
+	pagination := entities.PaginationDTO{
 		Page: &page,
 		PageSize: &pageSize,
 	}
@@ -285,7 +285,7 @@ func (mh *MessageHandle) UpdateMessage(command Command) (entities.Result) {
 
 	timesSent := uint8(parsedTimesSent)
 
-	data := &entities.MessageUpdate{
+	data := &entities.MessageUpdateDTO{
 		Content: &content,
 		TimesSent: &timesSent,
 	}
