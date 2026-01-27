@@ -79,11 +79,6 @@ type MessageUpdateDTO struct {
 	TimesSent *uint8
 }
 
-type Result struct {
-	Value *string
-	Error error
-}
-
 type PaginationDTO struct {
 	Page *uint8
 	PageSize *uint8
