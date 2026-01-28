@@ -20,6 +20,22 @@ type MessageDBRegistry struct {
 	TimesSent uint8 `json:"times_sent"`
 }
 
+type MessageFiltersDTO struct {
+	Content *string
+	DateRange *entities.DateRange 
+	TimesSent *entities.TimesSent
+}
+
+type MessageUpdateDTO struct {
+	Content *string
+	TimesSent *uint8
+}
+
+type PaginationDTO struct {
+	Page *uint8
+	PageSize *uint8
+}
+
 func (m *MessageDBRegistry) ToModel() *entities.Message{
 	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
 	return &entities.Message{

@@ -67,19 +67,3 @@ func (ts *TimesSent) MatchOperation(value uint8) bool {
 		return true
 	}
 }
-
-type MessageFiltersDTO struct {
-	Content *string
-	DateRange *DateRange 
-	TimesSent *TimesSent
-}
-
-type MessageUpdateDTO struct {
-	Content *string
-	TimesSent *uint8
-}
-
-type PaginationDTO struct {
-	Page *uint8
-	PageSize *uint8
-}
