@@ -31,6 +31,24 @@ func (p *PersonDBRegistry) ToModel() *models.Person {
 	}
 }
 
+// pagination.go
+// package repositories
+type Pagination struct {
+	Limit uint8 `json:"limit"`
+	Page  uint8 `json:"page"`
+}
+
+func (p *Pagination) Paginate(items any) any {
+	return nil
+}
+
+// END
+
+type PaginatedPersons struct {
+	Content    []*models.Person `json:"content"`
+	Pagination `json:"pagination"`
+}
+
 type PersonRepository struct {
 	dbConnection db.FileHandler
 }
@@ -63,7 +81,7 @@ func (p *PersonRepository) GetById(id uuid.UUID) (*models.Person, error) {
 	return nil, fmt.Errorf("person with id '%s' not found", id)
 }
 
-func (p *PersonRepository) GetAll(limit uint8, offset uint8) ([]*models.Person, error) {
+func (p *PersonRepository) GetAll(limit uint8, offset uint8) (*PaginatedPersons, error) {
 	var persons []PersonDBRegistry
 
 	personsDBTable, err := p.dbConnection.Read()
@@ -85,5 +103,13 @@ func (p *PersonRepository) GetAll(limit uint8, offset uint8) ([]*models.Person, 
 		personModels = append(personModels, persons[i].ToModel())
 	}
 
-	return personModels, nil
+	pagination := Pagination{
+		Limit: limit,
+		Page:  offset,
+	}
+	a := &PaginatedPersons{
+		Content:    pagination.Paginate(personModels).([]*models.Person),
+		Pagination: pagination,
+	}
+	return a, nil
 }
