@@ -18,7 +18,7 @@ type Message struct {
 	TimesSent uint8 `json:"times_sent"`
 }
 
-func NewMessage(content string, timeSent uint8) (*Message, error) {
+func NewMessage(content string, timesSent uint8) (*Message, error) {
 	contentTreated := strings.TrimSpace(content)
 
 	if contentTreated == "" {
@@ -29,21 +29,21 @@ func NewMessage(content string, timeSent uint8) (*Message, error) {
 		return nil, fmt.Errorf("'content' must have at most %v characters", MAX_CONTENT_SIZE)
 	}
 
-	if timeSent > MAX_TIME_SENT_COUNT {
-		return nil, fmt.Errorf("'time sent' must have at most %v characters", MAX_TIME_SENT_COUNT)
+	if timesSent > MAX_TIME_SENT_COUNT {
+		return nil, fmt.Errorf("'time sent' must be less than or equal to %v", MAX_TIME_SENT_COUNT)
 	}
 
 	return &Message{
 		ID: uuid.New(),
 		Content: content,
 		CreatedAt: time.Now(),
-		TimesSent: timeSent,
+		TimesSent: timesSent,
 	}, nil
 }
 
 type DateRange struct {
 	Start time.Time 
-	End time.Time
+	End *time.Time
 }
 
 type TimesSent struct {
@@ -68,8 +68,18 @@ func (ts *TimesSent) MatchOperation(value uint8) bool {
 	}
 }
 
-type Filters struct {
+type MessageFiltersDTO struct {
 	Content *string
 	DateRange *DateRange 
 	TimesSent *TimesSent
+}
+
+type MessageUpdateDTO struct {
+	Content *string
+	TimesSent *uint8
+}
+
+type PaginationDTO struct {
+	Page *uint8
+	PageSize *uint8
 }

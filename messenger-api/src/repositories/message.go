@@ -56,6 +56,35 @@ func (m *MessageRespository) readTable() ([]MessageDBRegistry, error) {
 	return messages, nil
 }
 
+func paginateInMemory(items []entities.Message, page uint8, pageSize uint8) ([]entities.Message, error) {
+	if page <= 0 {
+		return nil, fmt.Errorf("paginateInMemory: 'page' must be greater than zero")
+	}
+
+	if pageSize <= 0 {
+		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
+	}
+
+	itemsSize := uint8(len(items))
+
+	start := (page - 1) * pageSize
+	if start >= itemsSize {
+		return []entities.Message{}, nil
+	}
+
+	end := start + pageSize
+	if end > itemsSize {
+		end = itemsSize
+	}
+
+	var result []entities.Message
+	for i := start; i < end; i++ {
+		result = append(result, items[i])
+	}
+
+	return result, nil
+}
+
 func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
   messages, err := m.readTable()
 	if err != nil {
@@ -71,8 +100,8 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
 }
 
-func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
-	var results []entities.Message
+func (m *MessageRespository) GetMessages(filters entities.MessageFiltersDTO, pagination entities.PaginationDTO) (*[]entities.Message, error) {
+	var data []entities.Message
 
 	messages, err := m.readTable()
 	if err != nil {
@@ -85,6 +114,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 	}
 
 	filterDateRange := filters.DateRange
+	
 	for _, message := range messages {
 		if filterContent != "" {
 			if !strings.Contains(strings.ToLower(message.Content), filterContent) {
@@ -94,10 +124,14 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 		if filterDateRange != nil {
 			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
-			if messageCreatedAt.Before(filterDateRange.Start) || 
-				messageCreatedAt.After(filterDateRange.End) {
-					continue
-				}
+
+			if messageCreatedAt.Before(filterDateRange.Start) {
+				continue
+			}
+
+			if filterDateRange.End != nil && messageCreatedAt.After(*filterDateRange.End) {
+				continue
+			}
 		}
 
 		if filters.TimesSent != nil {
@@ -106,7 +140,12 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 			}
 		}
 
-		results = append(results, *message.ToModel())
+		data = append(data, *message.ToModel())
+	}
+
+	results, err := paginateInMemory(data, *pagination.Page, *pagination.PageSize)
+	if err != nil {
+		fmt.Println("getMessages: %w", err)
 	}
 
 	return &results, nil
@@ -166,6 +205,47 @@ func (m *MessageRespository) InsertMessage(message *entities.Message) error {
 	_, err = m.dbConnection.Write(newData)
 	if err != nil {
 		return fmt.Errorf("insertMessage: failed to save database: %w", err)
+	}
+
+	return nil
+}
+
+func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *entities.MessageUpdateDTO) error {
+	messages, err := m.readTable()
+	if err != nil {
+		return fmt.Errorf("updateMessage: %w", err)
+	}
+
+	for index, message := range messages {
+		if id == message.ID {
+
+			if data.Content != nil {
+				if len(*data.Content) > entities.MAX_CONTENT_SIZE {
+					return fmt.Errorf("'content' must have at most %v characters", entities.MAX_CONTENT_SIZE)
+				}
+				message.Content = *data.Content
+			}
+
+			if data.TimesSent != nil {
+				if *data.TimesSent > entities.MAX_TIME_SENT_COUNT {
+					return fmt.Errorf("updateMessage: must be less than or equal to %v", entities.MAX_TIME_SENT_COUNT)
+				}
+
+				message.TimesSent = *data.TimesSent
+			}
+
+			messages[index] = message
+		}
+	}
+
+	newData, err := json.MarshalIndent(messages, "", " ")
+	if err != nil {
+		return fmt.Errorf("updateMessage: marshal %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("updateMessage: failed to save database: %w", err)
 	}
 
 	return nil
