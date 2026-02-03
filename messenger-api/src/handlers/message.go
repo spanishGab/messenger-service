@@ -122,7 +122,7 @@ func (mh *MessageHandler) GetMessages(command Command) (Result) {
 		}
 	}
 
-	filters := entities.MessageFiltersDTO{
+	filters := repositories.MessageFiltersDTO{
 		Content: &content,
 		DateRange: &dateRange,
 		TimesSent: &timesSent,
@@ -154,7 +154,7 @@ func (mh *MessageHandler) GetMessages(command Command) (Result) {
 		pageSize = parsedUint8
 	}
 
-	pagination := entities.PaginationDTO{
+	pagination := repositories.PaginationDTO{
 		Page: &page,
 		PageSize: &pageSize,
 	}
