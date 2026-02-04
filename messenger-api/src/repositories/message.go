@@ -20,6 +20,17 @@ type MessageDBRegistry struct {
 	TimesSent uint8 `json:"times_sent"`
 }
 
+type MessageFiltersDTO struct {
+	Content *string
+	DateRange *entities.DateRange 
+	TimesSent *entities.TimesSent
+}
+
+type MessageUpdateDTO struct {
+	Content *string
+	TimesSent *uint8
+}
+
 func (m *MessageDBRegistry) ToModel() *entities.Message{
 	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
 	return &entities.Message{
@@ -71,8 +82,8 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
 }
 
-func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.Message, error) {
-	var results []entities.Message
+func (m *MessageRespository) GetMessages(filters MessageFiltersDTO, pagination Pagination) (*PaginatedResult[entities.Message], error) {
+	var data []entities.Message
 
 	messages, err := m.readTable()
 	if err != nil {
@@ -85,6 +96,7 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 	}
 
 	filterDateRange := filters.DateRange
+	
 	for _, message := range messages {
 		if filterContent != "" {
 			if !strings.Contains(strings.ToLower(message.Content), filterContent) {
@@ -94,10 +106,14 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 
 		if filterDateRange != nil {
 			messageCreatedAt, _ := time.Parse(shared.ShortDateFormat, message.CreatedAt)
-			if messageCreatedAt.Before(filterDateRange.Start) || 
-				messageCreatedAt.After(filterDateRange.End) {
-					continue
-				}
+
+			if messageCreatedAt.Before(filterDateRange.Start) {
+				continue
+			}
+
+			if filterDateRange.End != nil && messageCreatedAt.After(*filterDateRange.End) {
+				continue
+			}
 		}
 
 		if filters.TimesSent != nil {
@@ -106,10 +122,15 @@ func (m *MessageRespository) GetMessages(filters entities.Filters) (*[]entities.
 			}
 		}
 
-		results = append(results, *message.ToModel())
+		data = append(data, *message.ToModel())
 	}
 
-	return &results, nil
+	results, err := PaginateInMemory(data, pagination)
+	if err != nil {
+		fmt.Println("getMessages: %w", err)
+	}
+
+	return results, nil
 }
 
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
@@ -166,6 +187,33 @@ func (m *MessageRespository) InsertMessage(message *entities.Message) error {
 	_, err = m.dbConnection.Write(newData)
 	if err != nil {
 		return fmt.Errorf("insertMessage: failed to save database: %w", err)
+	}
+
+	return nil
+}
+
+func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *MessageUpdateDTO) error {
+	messages, err := m.readTable()
+	if err != nil {
+		return fmt.Errorf("updateMessage: %w", err)
+	}
+
+	for index, message := range messages {
+		if id != message.ID { continue }
+	
+		message.Content = *data.Content
+		message.TimesSent = *data.TimesSent
+		messages[index] = message
+	}
+
+	newData, err := json.MarshalIndent(messages, "", " ")
+	if err != nil {
+		return fmt.Errorf("updateMessage: marshal %w", err)
+	}
+
+	_, err = m.dbConnection.Write(newData)
+	if err != nil {
+		return fmt.Errorf("updateMessage: failed to save database: %w", err)
 	}
 
 	return nil
