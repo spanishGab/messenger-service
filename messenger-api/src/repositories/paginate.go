@@ -2,12 +2,11 @@ package repositories
 
 import (
 	"fmt"
-	"messenger-api/src/entities"
 )
 
-type PaginatedResults struct {
-	Content any `json:"content"`
-	Pagination any `json:"pagination"`
+type PaginatedResult struct {
+	Content []any `json:"content"`
+	Pagination Pagination `json:"pagination"`
 }
 
 type Pagination struct {
@@ -15,7 +14,13 @@ type Pagination struct {
 	pageSize uint8
 }
 
-func (p Pagination) paginateInMemory(content []entities.Message) ([]entities.Message, error) {
+func (p Pagination) PaginateInMemory(content any) (*PaginatedResult, error) {
+	parsedContent, isArray := content.([]any)
+
+	if !isArray {
+		return nil, fmt.Errorf("content is  not an array")
+	}
+
 	if p.page <= 0 {
 		return nil, fmt.Errorf("paginateInMemory: 'page' must be greater than zero")
 	}
@@ -24,11 +29,17 @@ func (p Pagination) paginateInMemory(content []entities.Message) ([]entities.Mes
 		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
 	}
 
-	contentSize := uint8(len(content))
+	contentSize := uint8(len(parsedContent))
 
 	start := (p.page - 1) * p.pageSize
 	if start >= contentSize {
-		return []entities.Message{}, nil
+		return &PaginatedResult{
+			Content: []any{},
+			Pagination: Pagination{
+				page: p.page,
+				pageSize: p.pageSize,
+			},
+		}, nil
 	}
 
 	end := start + p.pageSize
@@ -36,10 +47,10 @@ func (p Pagination) paginateInMemory(content []entities.Message) ([]entities.Mes
 		end = contentSize
 	}
 
-	var result []entities.Message
+	var result PaginatedResult
 	for i := start; i < end; i++ {
-		result = append(result, content[i])
+		result.Content = append(result.Content, parsedContent[i])
 	}
 
-	return result, nil
+	return &result, nil
 }
