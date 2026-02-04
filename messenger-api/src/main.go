@@ -62,7 +62,7 @@ func main() {
 	deleteMessage := handlers.Command{
 		Type: handlers.Delete,
 		Data: map[string]string{
-			"id": "45f88db2-d973-44cf-abd4-4bda898d8ef6",
+			"id": "5fe979ba-85d6-4fa3-b1a1-a52ae1a95a57",
 		},
 	}
 
@@ -77,7 +77,7 @@ func main() {
 	insertMessage := handlers.Command{
 		Type: handlers.Create,
 		Data: map[string]string{
-			"content": "Buy cake",
+			"content": "Buy a puzzle",
 			"timesSent": "2",
 		},
 	}
@@ -94,8 +94,8 @@ func main() {
 		Type: handlers.Update,
 		Data: map[string]string{
 			"id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
-			"content": "Talk about money",
-			"timesSent": "1",
+			"content": "Talk about food",
+			"timesSent": "2",
 		},
 	}
 

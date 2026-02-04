@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-type PaginatedResult struct {
-	Content []any `json:"content"`
+type PaginatedResult[T any] struct {
+	Items []T `json:"items"`
 	Pagination Pagination `json:"pagination"`
 }
 
@@ -29,34 +29,25 @@ func NewPagination(page uint8, pageSize uint8) (*Pagination, error) {
 	}, nil
 }
 
-func (p Pagination) PaginateInMemory(content any) (*PaginatedResult, error) {
-	parsedContent, isArray := content.([]any)
+func PaginateInMemory[T any](items []T, pagination Pagination) (*PaginatedResult[T], error) {
+	contentSize := uint8(len(items))
 
-	if !isArray {
-		return nil, fmt.Errorf("content is  not an array")
-	}
-
-	contentSize := uint8(len(parsedContent))
-
-	start := (p.Page - 1) * p.PageSize
+	start := (pagination.Page - 1) * pagination.PageSize
 	if start >= contentSize {
-		return &PaginatedResult{
-			Content: []any{},
-			Pagination: Pagination{
-				Page: p.Page,
-				PageSize: p.PageSize,
-			},
+		return &PaginatedResult[T]{
+			Items: []T{},
+			Pagination: pagination,
 		}, nil
 	}
 
-	end := start + p.PageSize
+	end := start + pagination.PageSize
 	if end > contentSize {
 		end = contentSize
 	}
 
-	var result PaginatedResult
+	result := PaginatedResult[T]{Pagination: pagination}
 	for i := start; i < end; i++ {
-		result.Content = append(result.Content, parsedContent[i])
+		result.Items = append(result.Items, items[i])
 	}
 
 	return &result, nil

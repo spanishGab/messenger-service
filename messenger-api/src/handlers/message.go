@@ -166,7 +166,7 @@ func (mh *MessageHandler) GetMessages(command Command) Result {
 		}
 	}
 
-	unparsedResponse, err := json.MarshalIndent(messages, " ", "")
+	unparsedResponse, err := json.MarshalIndent(messages, "", " ")
 	if err != nil {
 		return Result{
 			Error: fmt.Errorf("error formatting response"),
