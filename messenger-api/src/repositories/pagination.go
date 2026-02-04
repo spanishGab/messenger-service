@@ -10,8 +10,23 @@ type PaginatedResult struct {
 }
 
 type Pagination struct {
-	page uint8
-	pageSize uint8
+	Page uint8
+	PageSize uint8
+}
+
+func NewPagination(page uint8, pageSize uint8) (*Pagination, error) {
+	if page <= 0 {
+		return nil, fmt.Errorf("paginateInMemory: 'page' must be greater than zero")
+	}
+
+	if pageSize <= 0 {
+		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
+	}
+
+	return &Pagination{
+		Page: page,
+		PageSize: pageSize,
+	}, nil
 }
 
 func (p Pagination) PaginateInMemory(content any) (*PaginatedResult, error) {
@@ -21,28 +36,20 @@ func (p Pagination) PaginateInMemory(content any) (*PaginatedResult, error) {
 		return nil, fmt.Errorf("content is  not an array")
 	}
 
-	if p.page <= 0 {
-		return nil, fmt.Errorf("paginateInMemory: 'page' must be greater than zero")
-	}
-
-	if p.pageSize <= 0 {
-		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
-	}
-
 	contentSize := uint8(len(parsedContent))
 
-	start := (p.page - 1) * p.pageSize
+	start := (p.Page - 1) * p.PageSize
 	if start >= contentSize {
 		return &PaginatedResult{
 			Content: []any{},
 			Pagination: Pagination{
-				page: p.page,
-				pageSize: p.pageSize,
+				Page: p.Page,
+				PageSize: p.PageSize,
 			},
 		}, nil
 	}
 
-	end := start + p.pageSize
+	end := start + p.PageSize
 	if end > contentSize {
 		end = contentSize
 	}

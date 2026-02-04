@@ -31,11 +31,6 @@ type MessageUpdateDTO struct {
 	TimesSent *uint8
 }
 
-type PaginationDTO struct {
-	Page *uint8
-	PageSize *uint8
-}
-
 func (m *MessageDBRegistry) ToModel() *entities.Message{
 	createdAt, _ := time.Parse(shared.ShortDateFormat, m.CreatedAt)
 	return &entities.Message{
@@ -72,35 +67,6 @@ func (m *MessageRespository) readTable() ([]MessageDBRegistry, error) {
 	return messages, nil
 }
 
-func paginateInMemory(items []entities.Message, page uint8, pageSize uint8) ([]entities.Message, error) {
-	if page <= 0 {
-		return nil, fmt.Errorf("paginateInMemory: 'page' must be greater than zero")
-	}
-
-	if pageSize <= 0 {
-		return nil, fmt.Errorf("paginateInMemory: 'pageSize' must be greater than zero")
-	}
-
-	itemsSize := uint8(len(items))
-
-	start := (page - 1) * pageSize
-	if start >= itemsSize {
-		return []entities.Message{}, nil
-	}
-
-	end := start + pageSize
-	if end > itemsSize {
-		end = itemsSize
-	}
-
-	var result []entities.Message
-	for i := start; i < end; i++ {
-		result = append(result, items[i])
-	}
-
-	return result, nil
-}
-
 func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
   messages, err := m.readTable()
 	if err != nil {
@@ -116,7 +82,7 @@ func (m *MessageRespository) GetById(id uuid.UUID) (*entities.Message, error) {
 	return nil, fmt.Errorf("getById: message with id '%s' was not found in the database", id)
 }
 
-func (m *MessageRespository) GetMessages(filters MessageFiltersDTO, pagination PaginationDTO) (*[]entities.Message, error) {
+func (m *MessageRespository) GetMessages(filters MessageFiltersDTO, pagination Pagination) (*PaginatedResult, error) {
 	var data []entities.Message
 
 	messages, err := m.readTable()
@@ -159,12 +125,12 @@ func (m *MessageRespository) GetMessages(filters MessageFiltersDTO, pagination P
 		data = append(data, *message.ToModel())
 	}
 
-	results, err := paginateInMemory(data, *pagination.Page, *pagination.PageSize)
+	results, err := pagination.PaginateInMemory(data)
 	if err != nil {
 		fmt.Println("getMessages: %w", err)
 	}
 
-	return &results, nil
+	return results, nil
 }
 
 func (m *MessageRespository) DeleteMessage(id uuid.UUID) error {
