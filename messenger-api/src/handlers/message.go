@@ -154,9 +154,9 @@ func (mh *MessageHandler) GetMessages(command Command) (Result) {
 		pageSize = parsedUint8
 	}
 
-	pagination := repositories.PaginationDTO{
-		Page: &page,
-		PageSize: &pageSize,
+	pagination := repositories.Pagination{
+		Page: page,
+		PageSize: pageSize,
 	}
 
 	messages, err := mh.messageRepository.GetMessages(filters, pagination)
@@ -290,7 +290,7 @@ func (mh *MessageHandler) UpdateMessage(command Command) (Result) {
 
 	timesSent := uint8(parsedTimesSent)
 
-	data := &entities.MessageUpdateDTO{
+	data := &repositories.MessageUpdateDTO{
 		Content: &content,
 		TimesSent: &timesSent,
 	}
