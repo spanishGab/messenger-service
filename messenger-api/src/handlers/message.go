@@ -27,7 +27,7 @@ func NewMessageHandle(messageRepository repositories.MessageRespository) *Messag
 	}
 }
 
-func (mh *MessageHandler) GetMessageById(command Command) (Result) {
+func (mh *MessageHandler) GetMessageById(command Command) Result {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
 		return Result{
@@ -62,7 +62,7 @@ func (mh *MessageHandler) GetMessageById(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandler) GetMessages(command Command) (Result) {
+func (mh *MessageHandler) GetMessages(command Command) Result {
 	content, _ := command.Data["content"]
 
 	unparsedCreatedAtStart, _ := command.Data["createdAtStart"]
@@ -179,7 +179,7 @@ func (mh *MessageHandler) GetMessages(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandler) DeleteMessage(command Command) (Result) {
+func (mh *MessageHandler) DeleteMessage(command Command) Result {
 	unparsedId, ok := command.Data["id"]
 	if !ok {
 		return Result{
@@ -208,7 +208,7 @@ func (mh *MessageHandler) DeleteMessage(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandler) InsertMessage(command Command) (Result) {
+func (mh *MessageHandler) InsertMessage(command Command) Result {
 	content, ok := command.Data["content"]
 	if !ok {
 		return Result{
@@ -252,7 +252,7 @@ func (mh *MessageHandler) InsertMessage(command Command) (Result) {
 	}
 }
 
-func (mh *MessageHandler) UpdateMessage(command Command) (Result) {
+func (mh *MessageHandler) UpdateMessage(command Command) Result {
 	unparsedID, ok := command.Data["id"]
 	if !ok {
 		return Result{
@@ -287,8 +287,19 @@ func (mh *MessageHandler) UpdateMessage(command Command) (Result) {
 			Error: fmt.Errorf("error parsing timesSent"),
 		}
 	}
-
 	timesSent := uint8(parsedTimesSent)
+
+	if err := entities.ValidateContent(content); err != nil {
+		return Result{
+			Error: err,
+		}
+	} 
+
+	if err := entities.ValidateTimesSent(timesSent); err != nil {
+		return Result{
+			Error: err,
+		}
+	}
 
 	data := &repositories.MessageUpdateDTO{
 		Content: &content,

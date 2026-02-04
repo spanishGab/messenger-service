@@ -199,25 +199,10 @@ func (m *MessageRespository) UpdateMessage(id uuid.UUID, data *MessageUpdateDTO)
 	}
 
 	for index, message := range messages {
-		if id != message.ID {
-			continue
-		}
-
-		if data.Content != nil {
-			if len(*data.Content) > entities.MAX_CONTENT_SIZE {
-				return fmt.Errorf("'content' must have at most %v characters", entities.MAX_CONTENT_SIZE)
-			}
-			message.Content = *data.Content
-		}
-
-		if data.TimesSent != nil {
-			if *data.TimesSent > entities.MAX_TIME_SENT_COUNT {
-				return fmt.Errorf("updateMessage: must be less than or equal to %v", entities.MAX_TIME_SENT_COUNT)
-			}
-
-			message.TimesSent = *data.TimesSent
-		}
-
+		if id != message.ID { continue }
+	
+		message.Content = *data.Content
+		message.TimesSent = *data.TimesSent
 		messages[index] = message
 	}
 

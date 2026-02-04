@@ -9,7 +9,7 @@ import (
 )
 
 const MAX_CONTENT_SIZE = 250
-const MAX_TIME_SENT_COUNT = 10
+const MAX_TIMES_SENT_COUNT = 10
 
 type Message struct {
 	ID uuid.UUID `json:"id"`
@@ -18,19 +18,35 @@ type Message struct {
 	TimesSent uint8 `json:"times_sent"`
 }
 
-func NewMessage(content string, timesSent uint8) (*Message, error) {
+func ValidateContent(content string) error {
 	contentTreated := strings.TrimSpace(content)
 
 	if contentTreated == "" {
-		return nil, fmt.Errorf("content cannot be empty")
+		return fmt.Errorf("content cannot be empty")
 	}
 
 	if len(content) > MAX_CONTENT_SIZE {
-		return nil, fmt.Errorf("'content' must have at most %v characters", MAX_CONTENT_SIZE)
+		return fmt.Errorf("'content' must have at most %v characters", MAX_CONTENT_SIZE)
 	}
 
-	if timesSent > MAX_TIME_SENT_COUNT {
-		return nil, fmt.Errorf("'time sent' must be less than or equal to %v", MAX_TIME_SENT_COUNT)
+	return nil
+}
+
+func ValidateTimesSent(timesSent uint8) error {
+	if timesSent > MAX_TIMES_SENT_COUNT {
+		return fmt.Errorf("'time sent' must be less than or equal to %v", MAX_TIMES_SENT_COUNT)
+	}
+
+	return nil
+}
+
+func NewMessage(content string, timesSent uint8) (*Message, error) {
+	if err := ValidateContent(content); err != nil {
+		return nil, err
+	}
+
+	if err := ValidateTimesSent(timesSent); err != nil {
+		return nil, err
 	}
 
 	return &Message{
