@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path"
+	"spanishGab/aula_camada_model/src/cmd"
 	"spanishGab/aula_camada_model/src/db"
 	"spanishGab/aula_camada_model/src/handlers"
 	"spanishGab/aula_camada_model/src/repositories"
@@ -16,18 +16,7 @@ func main() {
 
 	repo := repositories.NewPersonRepository(*dbConnection)
 	controller := handlers.NewPersonHandler(*repo)
+	router := cmd.NewPersonRouter(*controller)
 
-	command := handlers.Command{
-		Type: handlers.List,
-		Data: map[string]string{
-			"limit":  "1",
-			"offset": "-1",
-		},
-	}
-	result, err := controller.GetPersons(command)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return
-	}
-	fmt.Printf("%s", string(result))
+	router.Route(os.Args)
 }
