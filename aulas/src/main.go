@@ -16,7 +16,7 @@ func main() {
 
 	repo := repositories.NewPersonRepository(*dbConnection)
 	controller := handlers.NewPersonHandler(*repo)
-	router := cmd.NewPersonRouter(*controller)
+	command := cmd.NewPersonCommand(*controller)
 
-	router.Route(os.Args)
+	command.Run(os.Args)
 }

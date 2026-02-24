@@ -2,20 +2,26 @@ package cmd
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"spanishGab/aula_camada_model/src/handlers"
 )
 
-type PersonRouter struct {
+const (
+	IdOption = "--id"
+)
+
+type PersonCommand struct {
 	personHandler handlers.PersonHandler
 }
 
-func NewPersonRouter(personHandler handlers.PersonHandler) *PersonRouter {
-	return &PersonRouter{
+func NewPersonCommand(personHandler handlers.PersonHandler) *PersonCommand {
+	return &PersonCommand{
 		personHandler: personHandler,
 	}
 }
 
-func (pr *PersonRouter) Route(input []string) {
+func (pr *PersonCommand) Run(input []string) {
 	commandType, err := ValidateCommandType(input)
 	if err != nil {
 		fmt.Printf("error - %s", err)
@@ -23,7 +29,7 @@ func (pr *PersonRouter) Route(input []string) {
 	}
 
 	commandData := input[2:]
-	parse, handle, err := pr.ChooseParserAndHandler(*commandType, commandData)
+	parse, handle, err := pr.chooseParserAndHandler(*commandType)
 	if err != nil {
 		fmt.Printf("error - %s", err)
 		return
@@ -31,15 +37,17 @@ func (pr *PersonRouter) Route(input []string) {
 	command, err := parse(commandData)
 	if err != nil {
 		fmt.Printf("error - %s", err)
+		return
 	}
 	result, err := handle(*command)
 	if err != nil {
 		fmt.Printf("error - %s", err)
+		return
 	}
 	fmt.Println(result)
 }
 
-func (pr *PersonRouter) ChooseParserAndHandler(commandType handlers.CommandType, commandData []string) (CLIParser, handlers.Handler, error) {
+func (pr *PersonCommand) chooseParserAndHandler(commandType handlers.CommandType) (CLIParser, handlers.Handler, error) {
 	var parse CLIParser
 	var handle handlers.Handler
 	switch commandType {
@@ -55,27 +63,48 @@ func (pr *PersonRouter) ChooseParserAndHandler(commandType handlers.CommandType,
 	return parse, handle, nil
 }
 
-func (pr *PersonRouter) parseListCommand(commandData []string) (*handlers.Command, error) {
-	if len(commandData) < 2 {
-		return nil, fmt.Errorf("you should provide limit and offset arguments")
+func (pr *PersonCommand) parseListCommand(commandData []string) (*handlers.Command, error) {
+	var parsedCommandData = make(handlers.CommandData)
+	paginationData, err := parsePaginationCommandData(commandData)
+	if err != nil {
+		return nil, err
+	}
+	formatData, err := parseFormatCommandData(commandData)
+	if err != nil {
+		return nil, err
+	}
+	maps.Copy(parsedCommandData, *paginationData)
+	if formatData != nil {
+		maps.Copy(parsedCommandData, *formatData)
 	}
 	return &handlers.Command{
 		Type: handlers.List,
-		Data: handlers.CommandData{
-			"limit":  commandData[0],
-			"offset": commandData[1],
-		},
+		Data: parsedCommandData,
 	}, nil
 }
 
-func (pr *PersonRouter) parseFindCommand(commandData []string) (*handlers.Command, error) {
-	if len(commandData) < 1 {
+func (pr *PersonCommand) parseFindCommand(commandData []string) (*handlers.Command, error) {
+	if len(commandData) < 2 {
 		return nil, fmt.Errorf("you should provide a person id")
 	}
+	idIndex := slices.Index(commandData, IdOption)
+	if idIndex == -1 {
+		return nil, fmt.Errorf("you should provide --id argument")
+	}
+
+	var parsedCommandData = handlers.CommandData{
+		"id": commandData[idIndex+1],
+	}
+
+	formatData, err := parseFormatCommandData(commandData)
+	if err != nil {
+		return nil, err
+	}
+	if formatData != nil {
+		maps.Copy(parsedCommandData, *formatData)
+	}
 	return &handlers.Command{
-		Type: handlers.List,
-		Data: handlers.CommandData{
-			"id": commandData[0],
-		},
+		Type: handlers.Find,
+		Data: parsedCommandData,
 	}, nil
 }

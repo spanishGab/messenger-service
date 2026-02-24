@@ -34,7 +34,7 @@ func (ph *PersonHandler) GetPersonById(command Command) (string, error) {
 		return "", fmt.Errorf("error while searching for person")
 	}
 
-	response, err := json.MarshalIndent(person, "", "  ")
+	response, err := ph.parseResponse(command, person)
 	if err != nil {
 		return "", fmt.Errorf("internal application error")
 	}
@@ -62,9 +62,35 @@ func (ph *PersonHandler) GetPersons(command Command) (string, error) {
 
 	persons, err := ph.personRepository.GetAll(uint8(limit), uint8(offset))
 
-	response, err := json.MarshalIndent(persons, "", "  ")
+	response, err := ph.parseResponse(command, persons)
 	if err != nil {
 		return "", fmt.Errorf("internal application error")
 	}
 	return string(response), nil
+}
+
+func (ph *PersonHandler) parseResponse(command Command, object any) ([]byte, error) {
+	format := command.Data["format"]
+	var response []byte
+	var err error
+
+	var serializeToJSON = func(persons any) ([]byte, error) {
+		response, err = json.MarshalIndent(persons, "", "  ")
+		if err != nil {
+			return nil, err
+		}
+		return response, nil
+	}
+	switch OutputFormat(format) {
+	case JSONFormat:
+		response, err = serializeToJSON(object)
+	case Unformatted:
+		response, err = json.Marshal(object)
+	default:
+		response, err = serializeToJSON(object)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("internal application error")
+	}
+	return response, nil
 }
