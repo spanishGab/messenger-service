@@ -3,13 +3,10 @@ package main
 import (
 	"fmt"
 	"messenger-api/src/db"
-	"messenger-api/src/entities"
+	"messenger-api/src/handlers"
 	"messenger-api/src/repositories"
 	"os"
 	"path"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -23,74 +20,89 @@ func main() {
 	dbConnection.Connection()
 
 	repo := repositories.NewMessageRepository(*dbConnection)
+	controller := handlers.NewMessageHandle(*repo)
 
-	// // GetById
-	// var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
-	// message, err := repo.GetById(id)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with ID '%w': %w", id, err)
-	// 	return 
-	// }
+	// GetById
+	listById := handlers.Command{
+		Type: handlers.ListById,
+		Data: map[string]string{
+			"id": "8f5eadea-c459-41d9-ae74-dc7164d9483b",
+		},
+	}
 
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Message found:\n%+v\n", string(output))
+	messageById := controller.GetMessageById(listById)
+	if messageById.Error != nil {
+		fmt.Printf("Error: %s\n", messageById.Error)
+		return 
+	}
+	fmt.Printf("%s \n", string(*messageById.Value))
 
-	// // GetMessages
-	// content := "message"
+	// GetMessages
+	list := handlers.Command{
+		Type: handlers.List,
+		Data: map[string]string{
+			"content": "buy",
+			"createdAtStart": "2026-01-19",
+			"createdAtEnd": "2026-01-19",
+			"timesSentValue": "2",
+			"timesSentOperator": ">=",
+			"page": "3",
+			"pageSize": "1",
+		},
+	}
 
-	// startDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-11")
-	// endDate, _ := time.Parse(shared.ShortDateFormat, "2025-12-12")
+	messangeList := controller.GetMessages(list)
+	if messangeList.Error != nil {
+		fmt.Printf("Error: %s\n", messangeList.Error)
+		return 
+	}
+	fmt.Printf("%s \n", string(*messangeList.Value))
 
-	// dateRange := entities.DateRange{
-	// 	Start: startDate,
-	// 	End: endDate,
-	// }
+	// DeleteMessage 
+	deleteMessage := handlers.Command{
+		Type: handlers.Delete,
+		Data: map[string]string{
+			"id": "5fe979ba-85d6-4fa3-b1a1-a52ae1a95a57",
+		},
+	}
 
-	// timesSent := entities.TimesSent{
-	// 	Value: uint8(2),
-	// 	Operator: "=",
-	// }
-
-	// filters := entities.Filters{
-	// 	Content: &content,
-	// 	DateRange: &dateRange,
-	// 	TimesSent: &timesSent,
-	// }
-
-	// message, err := repo.GetMessages(filters)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
-	// 	return 
-	// }
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Message found:\n%+v\n", string(output))
-
-	// // DeleteMessages
-	// var id = uuid.MustParse("30bcc896-deba-44da-813c-5d52c9de42b9")
-	// err = repo.DeleteMessage(id)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// filters := entities.Filters{}
-	// message, err := repo.GetMessages(filters)
-	// if err != nil {
-	// 	fmt.Println("failed to retrieve message with content '%w': %w", filters.Content, err)
-	// 	return 
-	// }
-	// output, _ := json.MarshalIndent(message, "", "  ")
-	// fmt.Printf("Messages found:\n%+v\n", string(output))
+	deleteResult := controller.DeleteMessage(deleteMessage)
+	if deleteResult.Error != nil {
+		fmt.Printf("Error: %s\n", deleteResult.Error)
+		return 
+	}
+	fmt.Printf("%s \n", string(*deleteResult.Value))
 
 	// InsertMessage
-	message, err := entities.NewMessage("Buy Spanish book", 3)
-	if err != nil {
-		fmt.Println("failed to create new message:", err)
-		return 
+	insertMessage := handlers.Command{
+		Type: handlers.Create,
+		Data: map[string]string{
+			"content": "Buy a puzzle",
+			"timesSent": "2",
+		},
 	}
 
-	if err := repo.InsertMessage(message); err != nil {
-		fmt.Println("failed to insert message '%w':", message)
+	insertResult := controller.InsertMessage(insertMessage)
+	if insertResult.Error != nil {
+		fmt.Printf("Error: %s\n", insertResult.Error)
 		return 
 	}
+	fmt.Printf("%s \n", string(*insertResult.Value))
+
+	// UpdateMessage
+	updateMessage := handlers.Command{
+		Type: handlers.Update,
+		Data: map[string]string{
+			"id": "e6718f1b-d178-4f69-97a2-3b01b986fb3f",
+			"content": "Talk about food",
+			"timesSent": "2",
+		},
+	}
+
+	updateResult := controller.UpdateMessage(updateMessage)
+	if updateResult.Error != nil {
+		fmt.Printf("Error: %s\n", updateResult.Error)
+		return 
+	}
+	fmt.Printf("%s \n", string(*updateResult.Value))
 }
