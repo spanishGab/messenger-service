@@ -7,9 +7,6 @@ import (
 	"messenger-api/src/repositories"
 	"os"
 	"path"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -23,6 +20,9 @@ func main() {
 	dbConnection.Connection()
 
 	repo := repositories.NewMessageRepository(*dbConnection)
+	command := cmd.NewMessageCommand()
+
+	command.Run(os.Args)
 
 	// // GetById
 	// var id = uuid.MustParse("e6718f1b-d178-4f69-97a2-3b01b986fb3f")
