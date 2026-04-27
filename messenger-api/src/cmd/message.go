@@ -32,7 +32,21 @@ func (ms *MessageCommand) chooseParserAndHandler(commandType handlers.CommandTyp
 
 	switch commandType {
 	case handlers.List:
-			parse = ms.parseListCommand
+		parse = ms.parseListCommand
+		handle = ms.messageHandler.GetMessages
+	case handlers.Create:
+		parse = ms.parseListCommand
+	case handlers.Update:
+	parse = ms.parseListCommand
+	case handlers.Find:
+	parse = ms.parseListCommand
+	case handlers.Delete:
+	parse = ms.parseListCommand
 	}
 
+}
+
+func (ms *MessageCommand) parseListCommand(commandData []string) (*handlers.Command, error) {
+	var parsedCommandData = make(handlers.CommandData)
+	paginationData, err := parse
 }
